@@ -2,7 +2,7 @@
     "name": "lisachenko/php-deal",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "lisachenko/go-aop-php": "~0.4"
+        "lisachenko/go-aop-php": "~0.5@dev"
     },
     "license": "MIT",
     "authors": [
@@ -10,5 +10,8 @@
             "name": "Alexander Lisachenko",
             "email": "lisachenko.it@gmail.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-0": {"PhpDeal": "src/"}
+    }
 }
