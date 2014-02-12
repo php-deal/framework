@@ -11,6 +11,7 @@
 namespace PhpDeal\Aspect;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use Go\Lang\Annotation\Around;
@@ -22,6 +23,24 @@ use PhpDeal\Exception\ContractViolation;
  */
 class ContractCheckerAspect implements Aspect
 {
+
+    /**
+     * Annotation reader
+     *
+     * @var Reader|null
+     */
+    private $reader = null;
+
+    /**
+     * Default constructor
+     *
+     * @todo Remove injection of reader
+     * @param Reader $reader Annotation reader
+     */
+    public function __construct(Reader $reader)
+    {
+        $this->reader = $reader;
+    }
 
     /**
      * Verifies pre-condition contract for the method
@@ -71,6 +90,41 @@ class ContractCheckerAspect implements Aspect
 
         foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
             if (!$annotation instanceof Contract\Ensure) {
+                continue;
+            }
+
+            if (!$this->isContractSatisfied($object, $class->name, $args, $annotation)) {
+                throw new ContractViolation($invocation, $annotation->value);
+            };
+        }
+
+        return $result;
+    }
+
+    /**
+     * Verifies invariants for contract class
+     *
+     * @Around("@within(PhpDeal\Annotation\Invariant) && execution(public **->*(*))")
+     * @param MethodInvocation $invocation
+     *
+     * @throws ContractViolation
+     * @return mixed
+     */
+    public function invariantContract(MethodInvocation $invocation)
+    {
+        $object = $invocation->getThis();
+        $args   = $this->getMethodArguments($invocation);
+        $class  = $invocation->getMethod()->getDeclaringClass();
+        if ($class->isCloneable()) {
+            $args['__old'] = clone $object;
+        }
+
+        $result = $invocation->proceed();
+        $args['__result'] = $result;
+
+        // TODO: Do not use reader directly and pack annotation information into reflection
+        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
+            if (!$annotation instanceof Contract\Invariant) {
                 continue;
             }
 

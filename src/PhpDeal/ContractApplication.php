@@ -28,6 +28,7 @@ class ContractApplication extends AspectKernel
      */
     protected function configureAop(AspectContainer $container)
     {
-        $container->registerAspect(new ContractCheckerAspect());
+        $reader = $container->get('aspect.annotation.reader');
+        $container->registerAspect(new ContractCheckerAspect($reader));
     }
 }
