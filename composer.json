@@ -4,6 +4,9 @@
     "require": {
         "lisachenko/go-aop-php": "~0.5@dev"
     },
+    "require-dev": {
+        "symfony/console": "~2.1"
+    },
     "license": "MIT",
     "authors": [
         {
