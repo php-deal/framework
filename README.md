@@ -23,6 +23,13 @@ break a caller, C++ FAQs uses the memorable phrase "require no more, promise no 
 does not require more from the caller than before, and if it does not promise to deliver less than before,
 then the new specification is compatible with the old, and will not break the caller.
 
+[![Build Status](https://travis-ci.org/lisachenko/php-deal.png?branch=master)](https://travis-ci.org/lisachenko/php-deal)
+[![Dependencies Status](https://depending.in/lisachenko/php-deal.png)](http://depending.in/lisachenko/php-deal)
+[![Latest Stable Version](https://poser.pugx.org/lisachenko/php-deal/v/stable.png)](https://packagist.org/packages/lisachenko/php-deal)
+[![Total Downloads](https://poser.pugx.org/lisachenko/php-deal/downloads.png)](https://packagist.org/packages/lisachenko/php-deal)
+[![Latest Unstable Version](https://poser.pugx.org/lisachenko/php-deal/v/unstable.png)](https://packagist.org/packages/lisachenko/php-deal)
+[![License](https://poser.pugx.org/lisachenko/php-deal/license.png)](https://packagist.org/packages/lisachenko/php-deal)
+
 Installation
 ------------
 
