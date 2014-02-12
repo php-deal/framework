@@ -7,7 +7,7 @@ What is Design by Contract?
 ---------------------------
 
 The specification of a class or interface is the collection of non-private items provided as services to the
-caller, along with instructions for their use, as stated in phpDoc. Design By Contract is an effective technology
+caller, along with instructions for their use, as stated in phpDoc. [Design By Contract](http://en.wikipedia.org/wiki/Design_by_contract) is an effective technology
 for creating a specification.
 
 The fundamental idea of Design By Contract is to treat the services offered by a class or interface as a
