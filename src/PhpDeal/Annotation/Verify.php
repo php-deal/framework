@@ -9,7 +9,7 @@
  */
 namespace PhpDeal\Annotation;
 
-use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation as BaseAnnotation;
 
 /**
  * This annotation defines a Pre-condition check, applied to the method
@@ -17,7 +17,7 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target("METHOD")
  */
-class Verify extends Annotation
+class Verify extends BaseAnnotation
 {
 
 }

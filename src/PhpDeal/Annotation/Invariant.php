@@ -12,12 +12,12 @@ namespace PhpDeal\Annotation;
 use Doctrine\Common\Annotations\Annotation as BaseAnnotation;
 
 /**
- * This annotation defines a Post-condition check, applied to the method
+ * This annotation defines an Invariant check
  *
  * @Annotation
- * @Target("METHOD")
+ * @Target("CLASS")
  */
-class Ensure extends BaseAnnotation
+class Invariant extends BaseAnnotation
 {
 
 }
