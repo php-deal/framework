@@ -2,7 +2,7 @@
     "name": "lisachenko/php-deal",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "lisachenko/go-aop-php": "~0.5@dev"
+        "lisachenko/go-aop-php": "~0.5"
     },
     "require-dev": {
         "symfony/console": "~2.1"
@@ -15,6 +15,6 @@
         }
     ],
     "autoload": {
-        "psr-0": {"PhpDeal": "src/"}
+        "psr-4": {"PhpDeal\\": "src/"}
     }
 }
