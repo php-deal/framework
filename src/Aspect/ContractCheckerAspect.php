@@ -46,7 +46,7 @@ class ContractCheckerAspect implements Aspect
      * Verifies pre-condition contract for the method
      *
      * @param MethodInvocation $invocation
-     * @Before("@annotation(PhpDeal\Annotation\Verify)")
+     * @Before("@execution(PhpDeal\Annotation\Verify)")
      *
      * @throws ContractViolation
      */
@@ -70,7 +70,7 @@ class ContractCheckerAspect implements Aspect
     /**
      * Verifies post-condition contract for the method
      *
-     * @Around("@annotation(PhpDeal\Annotation\Ensure)")
+     * @Around("@execution(PhpDeal\Annotation\Ensure)")
      * @param MethodInvocation $invocation
      *
      * @throws ContractViolation

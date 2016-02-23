@@ -2,7 +2,7 @@
     "name": "lisachenko/php-deal",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "lisachenko/go-aop-php": "~0.5"
+        "goaop/framework": "~1.0|~2.0@dev"
     },
     "require-dev": {
         "symfony/console": "~2.1"
