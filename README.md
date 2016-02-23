@@ -23,9 +23,12 @@ break a caller, C++ FAQs uses the memorable phrase "require no more, promise no 
 does not require more from the caller than before, and if it does not promise to deliver less than before,
 then the new specification is compatible with the old, and will not break the caller.
 
-[![Latest Unstable Version](https://poser.pugx.org/lisachenko/php-deal/v/unstable.png)](https://packagist.org/packages/lisachenko/php-deal)
-[![License](https://poser.pugx.org/lisachenko/php-deal/license.png)](https://packagist.org/packages/lisachenko/php-deal)
-
+[![Build Status](https://secure.travis-ci.org/lisachenko/php-deal.png?branch=master)](https://travis-ci.org/lisachenko/php-deal)
+[![GitHub release](https://img.shields.io/github/release/lisachenko/php-deal.svg)](https://github.com/lisachenko/php-deal/releases/latest)
+[![Code Coverage](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
+[![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.5-8892BF.svg)](https://php.net/)
+[![License](https://img.shields.io/packagist/l/lisachenko/php-deal.svg)](https://packagist.org/packages/lisachenko/php-deal)
 Installation
 ------------
 
