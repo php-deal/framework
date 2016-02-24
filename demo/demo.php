@@ -8,9 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-/** @var Composer\Autoload\ClassLoader $loader */
-$loader = include __DIR__.'/../vendor/autoload.php';
-$loader->add('Demo', __DIR__);
+include __DIR__.'/../vendor/autoload.php';
 
 include_once __DIR__.'/aspect_bootstrap.php';
 

@@ -16,5 +16,8 @@
     ],
     "autoload": {
         "psr-4": {"PhpDeal\\": "src/"}
+    },
+    "autoload-dev": {
+        "psr-0": {"Demo\\": "demo/"}
     }
 }
