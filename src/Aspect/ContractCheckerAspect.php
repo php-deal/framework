@@ -34,7 +34,6 @@ class ContractCheckerAspect implements Aspect
     /**
      * Default constructor
      *
-     * @todo Remove injection of reader
      * @param Reader $reader Annotation reader
      */
     public function __construct(Reader $reader)
@@ -122,7 +121,6 @@ class ContractCheckerAspect implements Aspect
         $result = $invocation->proceed();
         $args['__result'] = $result;
 
-        // TODO: Do not use reader directly and pack annotation information into reflection
         foreach ($this->reader->getClassAnnotations($class) as $annotation) {
             if (!$annotation instanceof Contract\Invariant) {
                 continue;
