@@ -1,6 +1,7 @@
 <?php
 namespace PhpDeal\Functional;
 
+use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Stub\VerifyStub;
 
 class VerifyContractTest extends \PHPUnit_Framework_TestCase
@@ -13,7 +14,7 @@ class VerifyContractTest extends \PHPUnit_Framework_TestCase
 
     public function testVerifyInvalid()
     {
-        $this->setExpectedException('PhpDeal\Exception\ContractViolation');
+        $this->setExpectedException(ContractViolation::class);
         $verifyStub = new VerifyStub();
         $verifyStub->testNumeric('message');
     }
