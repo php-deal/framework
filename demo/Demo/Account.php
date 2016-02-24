@@ -16,7 +16,7 @@ use PhpDeal\Annotation as Contract;
  * Simple trade account class
  * @Contract\Invariant("$this->balance > 0")
  */
-class Account implements AccountContract
+class Account implements AccountContractInterface
 {
 
     /**

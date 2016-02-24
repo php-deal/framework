@@ -15,7 +15,7 @@ use PhpDeal\Annotation as Contract;
 /**
  * Simple trade account contract
  */
-interface AccountContract
+interface AccountContractInterface
 {
     /**
      * Deposits fixed amount of money to the account
