@@ -32,6 +32,11 @@ class ContractCheckerAspect implements Aspect
     private $reader = null;
 
     /**
+     * @var MethodInvocation
+     */
+    private $invocation;
+
+    /**
      * Default constructor
      *
      * @param Reader $reader Annotation reader
@@ -51,6 +56,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function preConditionContract(MethodInvocation $invocation)
     {
+        $this->invocation = $invocation;
         $object = $invocation->getThis();
         $args   = $this->getMethodArguments($invocation);
         $scope  = $invocation->getMethod()->getDeclaringClass()->name;
@@ -77,6 +83,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
+        $this->invocation = $invocation;
         $object = $invocation->getThis();
         $args   = $this->getMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
@@ -111,6 +118,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function invariantContract(MethodInvocation $invocation)
     {
+        $this->invocation = $invocation;
         $object = $invocation->getThis();
         $args   = $this->getMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
@@ -159,7 +167,7 @@ class ContractCheckerAspect implements Aspect
         try {
             $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
         } catch (\Exception $e) {
-            return false;
+            throw new ContractViolation($this->invocation, $annotation->value . " Details: " . $e->getMessage());
         }
 
         return $invocationResult === null || $invocationResult === true;

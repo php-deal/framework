@@ -1,27 +1,51 @@
 <?php
+/**
+ * PHP Deal framework
+ *
+ * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ *
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace PhpDeal\Functional;
 
-use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Stub\EnsureStub;
 
 class EnsureContractTest extends \PHPUnit_Framework_TestCase
 {
-    public function testEnsureValid()
+    /**
+     * @var EnsureStub
+     */
+    private $stub;
+
+    public function setUp()
     {
-        $ensureStub = new EnsureStub();
-        $ensureStub->increment(50);
+        parent::setUp();
+        $this->stub = new EnsureStub();
     }
 
+    public function tearDown()
+    {
+        unset($this->stub);
+        parent::tearDown();
+    }
+
+    public function testEnsureValid()
+    {
+        $this->stub->increment(50);
+    }
+
+    /**
+     * @expectedException \PhpDeal\Exception\ContractViolation
+     */
     public function testEnsureInvalid()
     {
-        $this->setExpectedException(ContractViolation::class);
-        $ensureStub = new EnsureStub();
-        $ensureStub->badIncrement(40);
+        $this->stub->badIncrement(40);
     }
 
     public function testEnsureCanHandleResult()
     {
-        $ensureStub = new EnsureStub();
-        $ensureStub->returnPrivateValue();
+        $this->stub->returnPrivateValue();
     }
 }

@@ -47,4 +47,15 @@ class VerifyStub
     {
         return;
     }
+
+    /**
+     * @param int $value
+     * @return bool
+     *
+     * @Contract\Verify("\Assert\Assertion::integer($value)")
+     */
+    public function add($value)
+    {
+        return true;
+    }
 }
