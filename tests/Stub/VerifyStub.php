@@ -47,4 +47,17 @@ class VerifyStub
     {
         return;
     }
+
+    /**
+     * Method with contract integrated with beberlei/assert library
+     *
+     * @param int $value
+     * @return bool
+     *
+     * @Contract\Verify("Assert\Assertion::integer($value)")
+     */
+    public function add($value)
+    {
+        return true;
+    }
 }
