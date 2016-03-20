@@ -2,7 +2,8 @@
     "name": "lisachenko/php-deal",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "goaop/framework": "~1.0|~2.0@dev"
+        "goaop/framework": "~1.0|~2.0@dev",
+        "beberlei/assert": "^2.4"
     },
     "require-dev": {
         "symfony/console": "~2.7|~3.0"

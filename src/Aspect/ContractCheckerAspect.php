@@ -156,7 +156,13 @@ class ContractCheckerAspect implements Aspect
         }
         $instance = is_object($instance) ? $instance : null;
 
-        return $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
+        try {
+            $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $invocationResult === null || $invocationResult === true;
     }
 
     /**
