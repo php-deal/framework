@@ -63,8 +63,8 @@ class ContractCheckerAspect implements Aspect
 
             try {
                 $this->ensureContractSatisfied($object, $scope, $args, $annotation);
-            } catch (DomainException $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e->getPrevious());
+            } catch (\Exception $e) {
+                throw new ContractViolation($invocation, $annotation->value, $e);
             }
         }
     }
@@ -97,8 +97,8 @@ class ContractCheckerAspect implements Aspect
 
             try {
                 $this->ensureContractSatisfied($object, $class->name, $args, $annotation);
-            } catch (DomainException $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e->getPrevious());
+            } catch (\Exception $e) {
+                throw new ContractViolation($invocation, $annotation->value, $e);
             }
         }
 
@@ -133,8 +133,8 @@ class ContractCheckerAspect implements Aspect
 
             try {
                 $this->ensureContractSatisfied($object, $class->name, $args, $annotation);
-            } catch (DomainException $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e->getPrevious());
+            } catch (\Exception $e) {
+                throw new ContractViolation($invocation, $annotation->value, $e);
             }
         }
 
@@ -162,16 +162,13 @@ class ContractCheckerAspect implements Aspect
         }
         $instance = is_object($instance) ? $instance : null;
 
-        try {
-            $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
-        } catch (\Exception $e) {
-            throw new DomainException("", 0, $e);
-        }
+        $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
 
         // we accept as a result only true or null
         // null may be a result of assertions from beberlei/assert which passed
         if ($invocationResult !== null && $invocationResult !== true) {
-            throw new DomainException();
+            $errorMessage = 'Invalid return value received from the assertion body, only boolean or void accepted';
+            throw new DomainException($errorMessage);
         }
     }
 
