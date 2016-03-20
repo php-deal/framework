@@ -167,7 +167,7 @@ class ContractCheckerAspect implements Aspect
         try {
             $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
         } catch (\Exception $e) {
-            throw new ContractViolation($this->invocation, $annotation->value . " Details: " . $e->getMessage());
+            throw new ContractViolation($this->invocation, $annotation->value, $e);
         }
 
         // if $invocationResult is null, $annotation->value didn't throw any exception
