@@ -132,3 +132,23 @@ NOTE! The code in the invariant may not call any public non-static members of th
 indirectly. Doing so will result in a stack overflow, as the invariant will wind up being called in an
 infinitely recursive manner.
 
+Integration with assertion library
+----------
+
+To enhance capabilities of contracts, it's possible to use [assertion library](https://github.com/beberlei/assert).
+```php
+    /**
+     * Deposits fixed amount of money to the account
+     *
+     * @param float $amount
+     *
+     * @Contract\Ensure("Assert\Assertion::integer($this->balance)")
+     */
+    public function deposit($amount)
+    {
+        $this->balance += $amount;
+    }
+```
+
+[More assertions](https://github.com/beberlei/assert#list-of-assertions)
+

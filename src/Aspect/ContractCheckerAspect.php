@@ -170,6 +170,8 @@ class ContractCheckerAspect implements Aspect
             throw new ContractViolation($this->invocation, $annotation->value . " Details: " . $e->getMessage());
         }
 
+        // if $invocationResult is null, $annotation->value didn't throw any exception
+        // for example - assertion passed (and didn't return bool value)
         return $invocationResult === null || $invocationResult === true;
     }
 
