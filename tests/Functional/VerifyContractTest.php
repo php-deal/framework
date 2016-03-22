@@ -81,4 +81,37 @@ class VerifyContractTest extends \PHPUnit_Framework_TestCase
     {
         $this->stub->add($value);
     }
+
+    public function testVerifyManyContractsValid()
+    {
+        $this->stub->sub(10);
+    }
+
+    public function providerVerifyManyContractsInvalid()
+    {
+        return [
+            [
+                'value' => ""
+            ],
+            [
+                'value' => 1
+            ],
+            [
+                'value' => null
+            ],
+            [
+                'value' => []
+            ]
+        ];
+    }
+
+    /**
+     * @param mixed $value
+     * @dataProvider providerVerifyManyContractsInvalid
+     * @expectedException \PhpDeal\Exception\ContractViolation
+     */
+    public function testVerifyManyContractsInvalid($value)
+    {
+        $this->stub->sub($value);
+    }
 }

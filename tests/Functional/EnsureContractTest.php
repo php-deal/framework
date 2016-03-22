@@ -39,6 +39,14 @@ class EnsureContractTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \PhpDeal\Exception\ContractViolation
      */
+    public function testEnsureManyContractsInvalid()
+    {
+        $this->stub->increment(-50);
+    }
+
+    /**
+     * @expectedException \PhpDeal\Exception\ContractViolation
+     */
     public function testEnsureInvalid()
     {
         $this->stub->badIncrement(40);

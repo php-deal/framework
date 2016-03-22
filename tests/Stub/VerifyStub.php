@@ -60,4 +60,18 @@ class VerifyStub
     {
         return true;
     }
+
+    /**
+     * Method with many contracts
+     *
+     * @param int $value
+     * @return bool
+     *
+     * @Contract\Verify("is_numeric($value)")
+     * @Contract\Verify("$value > 5")
+     */
+    public function sub($value)
+    {
+        return true;
+    }
 }

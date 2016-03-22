@@ -26,6 +26,7 @@ class EnsureStub
      * @param float $amount
      *
      * @Contract\Ensure("$this->privateValue == $__old->privateValue + $amount")
+     * @Contract\Ensure("$this->privateValue > 0")
      */
     public function increment($amount)
     {
