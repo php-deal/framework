@@ -11,7 +11,10 @@
 namespace PhpDeal\Aspect;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use Go\Lang\Annotation\Around;
@@ -19,9 +22,9 @@ use Go\Lang\Annotation\Before;
 use PhpDeal\Annotation as Contract;
 use PhpDeal\Exception\ContractViolation;
 use DomainException;
+use ReflectionClass;
+use PhpDeal\Aspect\ContractChecker\PostConditionChecker;
 
-/**
- */
 class ContractCheckerAspect implements Aspect
 {
 
@@ -80,29 +83,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
-        $object = $invocation->getThis();
-        $args   = $this->getMethodArguments($invocation);
-        $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
-            $args['__old'] = clone $object;
-        }
-
-        $result = $invocation->proceed();
-        $args['__result'] = $result;
-
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
-            if (!$annotation instanceof Contract\Ensure) {
-                continue;
-            }
-
-            try {
-                $this->ensureContractSatisfied($object, $class->name, $args, $annotation);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e);
-            }
-        }
-
-        return $result;
+        return (new PostConditionChecker())->conditionContract($invocation);
     }
 
     /**
@@ -139,54 +120,5 @@ class ContractCheckerAspect implements Aspect
         }
 
         return $result;
-    }
-
-    /**
-     * Returns a result of contract verification
-     *
-     * @param object|string $instance Invocation instance or string for static class
-     * @param string $scope Scope of method
-     * @param array $args List of arguments for the method
-     * @param Annotation $annotation Contract annotation
-     * @throws DomainException
-     */
-    private function ensureContractSatisfied($instance, $scope, array $args, $annotation)
-    {
-        static $invoker = null;
-        if (!$invoker) {
-            $invoker = function () {
-                extract(func_get_arg(0));
-
-                return eval('return ' . func_get_arg(1) . '; ?>');
-            };
-        }
-        $instance = is_object($instance) ? $instance : null;
-
-        $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
-
-        // we accept as a result only true or null
-        // null may be a result of assertions from beberlei/assert which passed
-        if ($invocationResult !== null && $invocationResult !== true) {
-            $errorMessage = 'Invalid return value received from the assertion body, only boolean or void accepted';
-            throw new DomainException($errorMessage);
-        }
-    }
-
-    /**
-     * Returns an associative list of arguments for the method invocation
-     *
-     * @param MethodInvocation $invocation
-     *
-     * @return array
-     */
-    private function getMethodArguments(MethodInvocation $invocation)
-    {
-        $parameters    = $invocation->getMethod()->getParameters();
-        $argumentNames = array_map(function (\ReflectionParameter $parameter) {
-            return $parameter->name;
-        }, $parameters);
-        $parameters    = array_combine($argumentNames, $invocation->getArguments());
-
-        return $parameters;
     }
 }
