@@ -10,24 +10,19 @@
 
 namespace PhpDeal\Aspect;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use Go\Lang\Annotation\Around;
 use Go\Lang\Annotation\Before;
 use PhpDeal\Annotation as Contract;
+use PhpDeal\Aspect\ContractChecker\InvariantChecker;
+use PhpDeal\Aspect\ContractChecker\PreConditionChecker;
 use PhpDeal\Exception\ContractViolation;
-use DomainException;
-use ReflectionClass;
 use PhpDeal\Aspect\ContractChecker\PostConditionChecker;
 
 class ContractCheckerAspect implements Aspect
 {
-
     /**
      * Annotation reader
      *
@@ -55,21 +50,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function preConditionContract(MethodInvocation $invocation)
     {
-        $object = $invocation->getThis();
-        $args   = $this->getMethodArguments($invocation);
-        $scope  = $invocation->getMethod()->getDeclaringClass()->name;
-
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
-            if (!$annotation instanceof Contract\Verify) {
-                continue;
-            }
-
-            try {
-                $this->ensureContractSatisfied($object, $scope, $args, $annotation);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e);
-            }
-        }
+        (new PreConditionChecker())->check($invocation);
     }
 
     /**
@@ -83,7 +64,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
-        return (new PostConditionChecker())->conditionContract($invocation);
+        return (new PostConditionChecker())->check($invocation);
     }
 
     /**
@@ -97,28 +78,6 @@ class ContractCheckerAspect implements Aspect
      */
     public function invariantContract(MethodInvocation $invocation)
     {
-        $object = $invocation->getThis();
-        $args   = $this->getMethodArguments($invocation);
-        $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
-            $args['__old'] = clone $object;
-        }
-
-        $result = $invocation->proceed();
-        $args['__result'] = $result;
-
-        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
-            if (!$annotation instanceof Contract\Invariant) {
-                continue;
-            }
-
-            try {
-                $this->ensureContractSatisfied($object, $class->name, $args, $annotation);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e);
-            }
-        }
-
-        return $result;
+        return (new InvariantChecker($this->reader))->check($invocation);
     }
 }

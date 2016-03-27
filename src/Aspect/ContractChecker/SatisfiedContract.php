@@ -8,12 +8,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect;
+namespace PhpDeal\Aspect\ContractChecker;
 
 use Doctrine\Common\Annotations\Annotation;
 use DomainException;
 
-class ContractSatisfiedChecker
+class SatisfiedContract
 {
     /**
      * Returns a result of contract verification

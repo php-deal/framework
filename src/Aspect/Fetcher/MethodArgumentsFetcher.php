@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect;
+namespace PhpDeal\Aspect\Fetcher;
 
 use Go\Aop\Intercept\MethodInvocation;
 

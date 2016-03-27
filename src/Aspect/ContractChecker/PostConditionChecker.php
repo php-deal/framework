@@ -14,7 +14,6 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Intercept\MethodInvocation;
-use PhpDeal\Aspect\ContractChecker;
 use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Annotation\Ensure;
 
@@ -25,7 +24,7 @@ class PostConditionChecker extends ContractChecker
      * @throws ContractViolation
      * @return mixed
      */
-    public function conditionContract(MethodInvocation $invocation)
+    public function check(MethodInvocation $invocation)
     {
         $object = $invocation->getThis();
         $args   = $this->getMethodArguments($invocation);

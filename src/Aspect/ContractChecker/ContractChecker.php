@@ -8,15 +8,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect;
+namespace PhpDeal\Aspect\ContractChecker;
 
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
 use DomainException;
 use Go\Aop\Intercept\MethodInvocation;
+use PhpDeal\Aspect\Fetcher\MethodArgumentsFetcher;
+use PhpDeal\Aspect\Fetcher\ParentsContractsFetcher;
 use ReflectionClass;
 
-class ContractChecker
+abstract class ContractChecker
 {
     /**
      * @param MethodInvocation $invocation
@@ -36,7 +38,7 @@ class ContractChecker
      */
     protected function ensureContractSatisfied($instance, $scope, array $args, $annotation)
     {
-        (new ContractSatisfiedChecker())->ensureContractSatisfied(
+        (new SatisfiedContract())->ensureContractSatisfied(
             $instance, $scope, $args, $annotation
         );
     }
