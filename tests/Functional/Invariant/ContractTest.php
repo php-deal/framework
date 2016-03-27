@@ -8,21 +8,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional;
+namespace PhpDeal\Functional\Invariant;
 
-use PhpDeal\Stub\EnsureStub;
-
-class EnsureContractTest extends \PHPUnit_Framework_TestCase
+class ContractTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var EnsureStub
+     * @var Stub
      */
     private $stub;
 
     public function setUp()
     {
         parent::setUp();
-        $this->stub = new EnsureStub();
+        $this->stub = new Stub();
     }
 
     public function tearDown()
@@ -31,29 +29,25 @@ class EnsureContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function testEnsureValid()
+    public function testInvariantValid()
     {
-        $this->stub->increment(50);
+        $this->stub->accelerate(10, 30); // let's have a speed 300m/s
     }
 
     /**
      * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testEnsureManyContractsInvalid()
+    public function testInvariantViolated()
     {
-        $this->stub->increment(-50);
+        $this->stub->accelerate(10, 3e7); // let's have a speed 3*1e8 m/s, faster than light!
     }
 
     /**
      * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testEnsureInvalid()
+    public function testInvariantViolatedAfterSeveralMethods()
     {
-        $this->stub->badIncrement(40);
-    }
-
-    public function testEnsureCanHandleResult()
-    {
-        $this->stub->returnPrivateValue();
+        $this->stub->accelerate(10, 30); // let's have a speed 300m/s
+        $this->stub->decelerate(20, 20); // Negative speed?
     }
 }

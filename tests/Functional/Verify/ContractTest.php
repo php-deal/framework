@@ -8,21 +8,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional;
+namespace PhpDeal\Functional\Verify;
 
-use PhpDeal\Stub\VerifyStub;
-
-class VerifyContractTest extends \PHPUnit_Framework_TestCase
+class ContractTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var VerifyStub
+     * @var Stub
      */
     private $stub;
 
     public function setUp()
     {
         parent::setUp();
-        $this->stub = new VerifyStub();
+        $this->stub = new Stub();
     }
 
     public function tearDown()

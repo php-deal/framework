@@ -8,17 +8,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Stub;
+namespace PhpDeal\Functional\Verify;
 
 use PhpDeal\Annotation as Contract;
 use Go\Lang\Annotation\Pointcut;
 
-/**
- * Simple class for check "Verify" logic of DbC
- */
-class VerifyStub
+class Stub
 {
-
     private $privateValue = 42;
 
     /**
@@ -74,4 +70,4 @@ class VerifyStub
     {
         return true;
     }
-}
+} 
