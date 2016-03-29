@@ -12,6 +12,7 @@ namespace PhpDeal\Aspect\ContractChecker;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Exception\ContractViolation;
@@ -35,30 +36,7 @@ class PostConditionChecker extends ContractChecker
 
         $result = $invocation->proceed();
         $args['__result'] = $result;
-
-        $reader = new CachedReader(
-            new AnnotationReader(),
-            new ArrayCache(),
-            true
-        );
-
-        $contracts = [];
-
-        $allContracts = $this->getParentsContracts(
-            Ensure::class,
-            $invocation->getMethod()->getDeclaringClass(),
-            $reader,
-            $contracts,
-            $invocation->getMethod()->getName()
-        );
-
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
-            if ($annotation instanceof Ensure) {
-                $allContracts[] = $annotation;
-            }
-        }
-
-        $allContracts = array_unique($allContracts);
+        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
 
         foreach ($allContracts as $contract) {
             try {
@@ -69,5 +47,45 @@ class PostConditionChecker extends ContractChecker
         }
 
         return $result;
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchAllContracts(MethodInvocation $invocation)
+    {
+        $allContracts = $this->fetchParentsContracts($invocation);
+        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+            if ($annotation instanceof Ensure) {
+                $allContracts[] = $annotation;
+            }
+        }
+
+        return $allContracts;
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchParentsContracts(MethodInvocation $invocation)
+    {
+        return $this->getParentsContracts(
+            Ensure::class,
+            $invocation->getMethod()->getDeclaringClass(),
+            $this->reader,
+            [],
+            $invocation->getMethod()->getName()
+        );
+    }
+
+    /**
+     * @param array $allContracts
+     * @return array
+     */
+    private function makeContractsUnique(array $allContracts)
+    {
+        return array_unique($allContracts);
     }
 }

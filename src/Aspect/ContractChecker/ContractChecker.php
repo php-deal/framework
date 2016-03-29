@@ -21,6 +21,19 @@ use ReflectionClass;
 abstract class ContractChecker
 {
     /**
+     * @var Reader|null
+     */
+    protected $reader = null;
+
+    /**
+     * @param Reader $reader Annotation reader
+     */
+    public function __construct(Reader $reader)
+    {
+        $this->reader = $reader;
+    }
+
+    /**
      * @param MethodInvocation $invocation
      * @return array
      */

@@ -32,36 +32,44 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-//    public function providerFooValid()
-//    {
-//        return [
-//            [
-//                'variable' => -10
-//            ]
-//        ];
-//    }
-//
-//    /**
-//     * @dataProvider providerFooValid
-//     */
-//    public function testFooValid($variable)
-//    {
-//        $this->stub->add($variable);
-//    }
-
-    public function providerAddInvalid()
+    public function providerAddValid()
     {
         return [
             [
-                'variable' => 0
-            ],
-            [
-                'variable' => ""
+                'variable' => 50,
             ]
         ];
     }
 
     /**
+     * @param int $variable
+     * @dataProvider providerAddValid
+     */
+    public function testAddValid($variable)
+    {
+        $this->stub->add($variable);
+    }
+
+    public function providerAddInvalid()
+    {
+        return [
+            [
+                // invalid for Stub
+                'variable' => 0
+            ],
+            [
+                // invalid for StubGrandparent
+                'variable' => ""
+            ],
+            [
+                // invalid for StubParent
+                'variable' => 101
+            ],
+        ];
+    }
+
+    /**
+     * @param int $variable
      * @dataProvider providerAddInvalid
      * @expectedException \PhpDeal\Exception\ContractViolation
      */

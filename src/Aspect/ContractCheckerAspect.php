@@ -50,7 +50,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function preConditionContract(MethodInvocation $invocation)
     {
-        (new PreConditionChecker())->check($invocation);
+        (new PreConditionChecker($this->reader))->check($invocation);
     }
 
     /**
@@ -64,7 +64,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
-        return (new PostConditionChecker())->check($invocation);
+        return (new PostConditionChecker($this->reader))->check($invocation);
     }
 
     /**

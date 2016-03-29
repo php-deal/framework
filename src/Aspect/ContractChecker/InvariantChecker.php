@@ -18,23 +18,6 @@ use PhpDeal\Annotation\Invariant;
 class InvariantChecker extends ContractChecker
 {
     /**
-     * Annotation reader
-     *
-     * @var Reader|null
-     */
-    private $reader = null;
-
-    /**
-     * Default constructor
-     *
-     * @param Reader $reader Annotation reader
-     */
-    public function __construct(Reader $reader)
-    {
-        $this->reader = $reader;
-    }
-
-    /**
      * Verifies invariants for contract class
      *
      * @Around("@within(PhpDeal\Annotation\Invariant) && execution(public **->*(*))")
