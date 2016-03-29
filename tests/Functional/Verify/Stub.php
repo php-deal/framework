@@ -21,7 +21,6 @@ class Stub
      * Method with numeric parameter requirement
      *
      * @param float $variable
-     *
      * @Contract\Verify("is_numeric($variable)")
      * @return float
      */
@@ -35,7 +34,6 @@ class Stub
      * Method with contract that access a private variable
      *
      * @param float $variable
-     *
      * @Contract\Verify("$variable > $this->privateValue")
      * @Pointcut("")
      */
@@ -49,7 +47,6 @@ class Stub
      *
      * @param int $value
      * @return bool
-     *
      * @Contract\Verify("Assert\Assertion::integer($value)")
      */
     public function add($value)
@@ -62,7 +59,6 @@ class Stub
      *
      * @param int $value
      * @return bool
-     *
      * @Contract\Verify("is_numeric($value)")
      * @Contract\Verify("$value > 5")
      */

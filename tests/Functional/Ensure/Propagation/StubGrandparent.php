@@ -17,10 +17,10 @@ class StubGrandparent
     /**
      * @var int
      */
-    protected $value = 10;
+    protected $value;
 
     /**
-     * @Contract\Ensure("is_numeric($this->value)")
+     * @Contract\Ensure("$this->value !== -1")
      */
     public function add($variable)
     {

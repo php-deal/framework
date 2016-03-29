@@ -16,7 +16,7 @@ abstract class StubParent
 extends StubGrandparent
 {
     /**
-     * @Contract\Ensure("$this->value < 100")
+     * @Contract\Ensure("$this->value !== 2")
      */
     public function add($variable)
     {

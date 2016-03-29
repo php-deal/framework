@@ -32,7 +32,7 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function providerAddValid()
+    public function providerEnsureValid()
     {
         return [
             [
@@ -43,37 +43,37 @@ class ContractTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param int $variable
-     * @dataProvider providerAddValid
+     * @dataProvider providerEnsureValid
      */
-    public function testAddValid($variable)
+    public function testEnsureValid($variable)
     {
         $this->stub->add($variable);
     }
 
-    public function providerAddInvalid()
+    public function providerEnsureInvalid()
     {
         return [
             [
                 // invalid for Stub
-                'variable' => 0
-            ],
-            [
-                // invalid for StubGrandparent
-                'variable' => ""
+                'variable' => 1
             ],
             [
                 // invalid for StubParent
-                'variable' => 101
+                'variable' => 2
+            ],
+            [
+                // invalid for StubGrandparent
+                'variable' => -1
             ],
         ];
     }
 
     /**
      * @param int $variable
-     * @dataProvider providerAddInvalid
+     * @dataProvider providerEnsureInvalid
      * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testAddInvalid($variable)
+    public function testEnsureInvalid($variable)
     {
         $this->stub->add($variable);
     }
