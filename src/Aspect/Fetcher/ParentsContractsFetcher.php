@@ -11,7 +11,10 @@
 namespace PhpDeal\Aspect\Fetcher;
 
 use Doctrine\Common\Annotations\Reader;
+use Go\Aop\Intercept\MethodInvocation;
+use PhpDeal\Aspect\ContractChecker\InheritDoc;
 use ReflectionClass;
+use ReflectionMethod;
 
 class ParentsContractsFetcher
 {
@@ -42,6 +45,34 @@ class ParentsContractsFetcher
         $contracts = array_merge($contracts, $contractAnnotations);
 
         return $this->getParentsContracts($parentClass, $reader, $contracts, $methodName);
+    }
+
+    public function getParentsContractsWithInheritDoc(ReflectionClass $class, Reader $reader, array $contracts, $methodName)
+    {
+        $parentClass = $class->getParentClass();
+        if (!$parentClass) {
+            return $contracts;
+        }
+
+        $parentMethod = $parentClass->getMethod($methodName);
+        $annotations = $reader->getMethodAnnotations($parentMethod);
+        $contractAnnotations = $this->getContractAnnotations($annotations);
+        $contracts = array_merge($contracts, $contractAnnotations);
+
+        if ($this->hasInheritDoc($parentMethod)) {
+            return $this->getParentsContractsWithInheritDoc($parentClass, $reader, $contracts, $methodName);
+        }
+
+        return $contracts;
+    }
+
+    /**
+     * @param ReflectionMethod $method
+     * @return bool
+     */
+    private function hasInheritDoc(ReflectionMethod $method)
+    {
+        return (new InheritDoc())->hasInheritDoc($method);
     }
 
     private function getContractAnnotations(array $annotations)

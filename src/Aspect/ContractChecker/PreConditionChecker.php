@@ -13,6 +13,8 @@ namespace PhpDeal\Aspect\ContractChecker;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Annotation as Contract;
+use PhpDeal\Annotation\Verify;
+use ReflectionMethod;
 
 class PreConditionChecker extends ContractChecker
 {
@@ -27,16 +29,51 @@ class PreConditionChecker extends ContractChecker
         $args   = $this->getMethodArguments($invocation);
         $scope  = $invocation->getMethod()->getDeclaringClass()->name;
 
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
-            if (!$annotation instanceof Contract\Verify) {
-                continue;
-            }
+        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
+        $this->fulfillContracts($allContracts, $object, $scope, $args, $invocation);
+    }
 
-            try {
-                $this->ensureContractSatisfied($object, $scope, $args, $annotation);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e);
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchAllContracts(MethodInvocation $invocation)
+    {
+        $allContracts = [];
+        if ($this->hasInheritDoc($invocation->getMethod())) {
+            $allContracts = $this->fetchParentsContracts($invocation);
+        }
+
+        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+            if ($annotation instanceof Verify) {
+                $allContracts[] = $annotation;
             }
         }
+
+        return $allContracts;
+    }
+
+    /**
+     * @param ReflectionMethod $method
+     * @return bool
+     */
+    private function hasInheritDoc(ReflectionMethod $method)
+    {
+        return (new InheritDoc())->hasInheritDoc($method);
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchParentsContracts(MethodInvocation $invocation)
+    {
+        return $this->getParentsContractsWithInheritDoc(
+            Verify::class,
+            $invocation->getMethod()->getDeclaringClass(),
+            $this->reader,
+            [],
+            $invocation->getMethod()->getName()
+        );
     }
 } 

@@ -10,10 +10,6 @@
 
 namespace PhpDeal\Aspect\ContractChecker;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Annotation\Ensure;
@@ -38,13 +34,7 @@ class PostConditionChecker extends ContractChecker
         $args['__result'] = $result;
         $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
 
-        foreach ($allContracts as $contract) {
-            try {
-                $this->ensureContractSatisfied($object, $class->name, $args, $contract);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $contract->value, $e);
-            }
-        }
+        $this->fulfillContracts($allContracts, $object, $class->name, $args, $invocation);
 
         return $result;
     }
@@ -78,14 +68,5 @@ class PostConditionChecker extends ContractChecker
             [],
             $invocation->getMethod()->getName()
         );
-    }
-
-    /**
-     * @param array $allContracts
-     * @return array
-     */
-    private function makeContractsUnique(array $allContracts)
-    {
-        return array_unique($allContracts);
     }
 }

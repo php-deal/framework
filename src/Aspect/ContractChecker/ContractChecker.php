@@ -17,6 +17,7 @@ use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Aspect\Fetcher\MethodArgumentsFetcher;
 use PhpDeal\Aspect\Fetcher\ParentsContractsFetcher;
 use ReflectionClass;
+use PhpDeal\Exception\ContractViolation;
 
 abstract class ContractChecker
 {
@@ -61,5 +62,32 @@ abstract class ContractChecker
         return (new ParentsContractsFetcher($annotationClass))->getParentsContracts(
             $class, $reader, $contracts, $methodName
         );
+    }
+
+    protected function getParentsContractsWithInheritDoc($annotationClass, ReflectionClass $class, Reader $reader, array $contracts, $methodName)
+    {
+        return (new ParentsContractsFetcher($annotationClass))->getParentsContractsWithInheritDoc(
+            $class, $reader, $contracts, $methodName
+        );
+    }
+
+    /**
+     * @param array $allContracts
+     * @return array
+     */
+    protected function makeContractsUnique(array $allContracts)
+    {
+        return array_unique($allContracts);
+    }
+
+    protected function fulfillContracts($allContracts, $instance, $scope, array $args, MethodInvocation $invocation)
+    {
+        foreach ($allContracts as $contract) {
+            try {
+                $this->ensureContractSatisfied($instance, $scope, $args, $contract);
+            } catch (\Exception $e) {
+                throw new ContractViolation($invocation, $contract->value, $e);
+            }
+        }
     }
 }
