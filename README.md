@@ -143,7 +143,7 @@ class Foo extends FooParent
 {
     /**
      * @param int $amount
-     * @Contract\Verify("$variable != 1")
+     * @Contract\Verify("$amount != 1")
      */
     public function bar($amount)
     {
@@ -155,7 +155,7 @@ class FooParent
 {
     /**
      * @param int $amount
-     * @Contract\Verify("$variable != 2")
+     * @Contract\Verify("$amount != 2")
      */
     public function bar($amount)
     {
@@ -165,7 +165,7 @@ class FooParent
     
 ```
 
-Foo::bar accepts '2' literal as a parameter, and does not accept '1'.
+Foo::bar accepts '2' literal as a parameter and does not accept '1'.
 
 With @inheritdoc:
 
@@ -175,7 +175,8 @@ class Foo extends FooParent
 {
     /**
      * @param int $amount
-     * @Contract\Verify("$variable != 1")
+     * @Contract\Verify("$amount != 1")
+     * {@inheritdoc}
      */
     public function bar($amount)
     {
@@ -187,8 +188,7 @@ class FooParent
 {
     /**
      * @param int $amount
-     * @Contract\Verify("$variable != 2")
-     * {@inheritdoc}
+     * @Contract\Verify("$amount != 2")
      */
     public function bar($amount)
     {
