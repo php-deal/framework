@@ -236,7 +236,7 @@ class FooParent
     
 ```
 
-Foo::bar does not accept '1' and '2' literals as a parameter.
+Foo::setBar does not accept '1' and '2' literals as a parameter.
 
 Integration with assertion library
 ----------
