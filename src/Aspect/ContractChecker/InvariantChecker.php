@@ -10,10 +10,10 @@
 
 namespace PhpDeal\Aspect\ContractChecker;
 
-use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Annotation\Invariant;
+use ReflectionClass;
 
 class InvariantChecker extends ContractChecker
 {
@@ -37,18 +37,39 @@ class InvariantChecker extends ContractChecker
         $result = $invocation->proceed();
         $args['__result'] = $result;
 
-        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
-            if (!$annotation instanceof Invariant) {
-                continue;
-            }
+        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($class));
+        $this->fulfillContracts($allContracts, $object, $class->name, $args, $invocation);
 
-            try {
-                $this->ensureContractSatisfied($object, $class->name, $args, $annotation);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $annotation->value, $e);
+        return $result;
+    }
+
+    /**
+     * @param ReflectionClass $class
+     * @return array
+     */
+    private function fetchAllContracts(ReflectionClass $class)
+    {
+        $allContracts = $this->fetchParentsContracts($class);
+        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
+            if ($annotation instanceof Invariant) {
+                $allContracts[] = $annotation;
             }
         }
 
-        return $result;
+        return $allContracts;
+    }
+
+    /**
+     * @param ReflectionClass $class
+     * @return array
+     */
+    private function fetchParentsContracts(ReflectionClass $class)
+    {
+        return $this->getParentsClassesContracts(
+            Invariant::class,
+            $class,
+            $this->reader,
+            []
+        );
     }
 } 

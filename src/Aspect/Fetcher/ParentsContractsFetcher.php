@@ -47,6 +47,21 @@ class ParentsContractsFetcher
         return $this->getParentsContracts($parentClass, $reader, $contracts, $methodName);
     }
 
+    public function getParentsClassesContracts(ReflectionClass $class, Reader $reader, array $contracts)
+    {
+        $parentClass = $class->getParentClass();
+
+        if (!$parentClass) {
+            return $contracts;
+        }
+
+        $annotations = $reader->getClassAnnotations($parentClass);
+        $contractAnnotations = $this->getContractAnnotations($annotations);
+        $contracts = array_merge($contracts, $contractAnnotations);
+
+        return $this->getParentsClassesContracts($parentClass, $reader, $contracts);
+    }
+
     public function getParentsContractsWithInheritDoc(ReflectionClass $class, Reader $reader, array $contracts, $methodName)
     {
         $parentClass = $class->getParentClass();

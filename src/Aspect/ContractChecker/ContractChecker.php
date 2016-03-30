@@ -64,6 +64,13 @@ abstract class ContractChecker
         );
     }
 
+    protected function getParentsClassesContracts($annotationClass, ReflectionClass $class, Reader $reader, array $contracts)
+    {
+        return (new ParentsContractsFetcher($annotationClass))->getParentsClassesContracts(
+            $class, $reader, $contracts
+        );
+    }
+
     protected function getParentsContractsWithInheritDoc($annotationClass, ReflectionClass $class, Reader $reader, array $contracts, $methodName)
     {
         return (new ParentsContractsFetcher($annotationClass))->getParentsContractsWithInheritDoc(
