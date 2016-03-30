@@ -135,7 +135,7 @@ infinitely recursive manner.
 Contract propagation
 ----------
 
-For preconditions (Verify contract) subclasses do not inherit contracts of parents' methods if they don't have @inheritdoc annotation. Example:
+For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have @inheritdoc annotation. Example:
 
 ```php
 
@@ -203,7 +203,7 @@ Foo::bar does not accept '1' and '2' literals as a parameter.
 
 
 
-For postconditions (Ensure contract) and Invariants subclasses inherit contracts and they don't need @inheritdoc. Example:
+For postconditions (Ensure and Invariants contracts) subclasses inherit contracts and they don't need @inheritdoc. Example:
 
 ```php
     
