@@ -29,4 +29,4 @@ class Stub extends StubParent
     {
         $this->variable = $variable;
     }
-} 
+}

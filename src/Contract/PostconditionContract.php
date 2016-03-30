@@ -68,4 +68,4 @@ class PostconditionContract extends Contract
             $invocation->getMethod()->getName()
         );
     }
-} 
+}

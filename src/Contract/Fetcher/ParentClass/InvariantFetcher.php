@@ -35,4 +35,4 @@ class InvariantFetcher extends Fetcher
 
         return $this->getConditions($parentClass, $reader, $contracts);
     }
-} 
+}

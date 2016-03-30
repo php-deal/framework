@@ -12,8 +12,7 @@ namespace PhpDeal\Functional\Ensure\Propagation;
 
 use PhpDeal\Annotation as Contract;
 
-abstract class StubParent
-extends StubGrandparent
+abstract class StubParent extends StubGrandparent
 {
     /**
      * @Contract\Ensure("$this->value !== 2")
@@ -22,4 +21,4 @@ extends StubGrandparent
     {
         $this->value += $variable;
     }
-} 
+}

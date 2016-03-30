@@ -66,4 +66,4 @@ class MethodConditionWithInheritDocFetcher extends Fetcher
     {
         return preg_match('/\@inheritdoc/i', $method->getDocComment()) > 0;
     }
-} 
+}

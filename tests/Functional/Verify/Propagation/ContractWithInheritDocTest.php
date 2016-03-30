@@ -78,4 +78,4 @@ class ContractWithInheritDocTest extends \PHPUnit_Framework_TestCase
     {
         $this->stub->add($parameter);
     }
-} 
+}

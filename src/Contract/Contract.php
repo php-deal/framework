@@ -98,4 +98,4 @@ abstract class Contract
             throw new DomainException($errorMessage);
         }
     }
-} 
+}

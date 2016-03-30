@@ -18,4 +18,4 @@ use PhpDeal\Annotation as Contract;
 abstract class StubParent extends StubGrandparent
 {
 
-} 
+}

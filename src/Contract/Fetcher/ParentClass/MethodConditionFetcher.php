@@ -37,4 +37,4 @@ class MethodConditionFetcher extends Fetcher
 
         return $this->getConditions($parentClass, $reader, $methodName, $contracts);
     }
-} 
+}

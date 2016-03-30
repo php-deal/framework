@@ -61,4 +61,4 @@ class PreconditionContract extends Contract
             $invocation->getMethod()->getName()
         );
     }
-} 
+}

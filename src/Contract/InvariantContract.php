@@ -67,7 +67,8 @@ class InvariantContract extends Contract
     private function fetchParentsContracts(ReflectionClass $class)
     {
         return (new InvariantFetcher(Invariant::class))->getConditions(
-            $class, $this->reader
+            $class,
+            $this->reader
         );
     }
-} 
+}

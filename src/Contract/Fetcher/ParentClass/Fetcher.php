@@ -41,4 +41,4 @@ class Fetcher
 
         return $contractAnnotations;
     }
-} 
+}

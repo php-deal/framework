@@ -77,6 +77,4 @@ class ContractTest extends \PHPUnit_Framework_TestCase
     {
         $this->stub->setVariable($variable);
     }
-
-
-} 
+}
