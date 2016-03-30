@@ -16,10 +16,10 @@ use Go\Aop\Intercept\MethodInvocation;
 use Go\Lang\Annotation\Around;
 use Go\Lang\Annotation\Before;
 use PhpDeal\Annotation as Contract;
-use PhpDeal\Aspect\ContractChecker\InvariantChecker;
-use PhpDeal\Aspect\ContractChecker\PreConditionChecker;
+use PhpDeal\Contract\InvariantContract;
+use PhpDeal\Contract\PostconditionContract;
+use PhpDeal\Contract\PreconditionContract;
 use PhpDeal\Exception\ContractViolation;
-use PhpDeal\Aspect\ContractChecker\PostConditionChecker;
 
 class ContractCheckerAspect implements Aspect
 {
@@ -50,7 +50,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function preConditionContract(MethodInvocation $invocation)
     {
-        (new PreConditionChecker($this->reader))->check($invocation);
+        (new PreconditionContract($this->reader))->check($invocation);
     }
 
     /**
@@ -64,7 +64,7 @@ class ContractCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
-        return (new PostConditionChecker($this->reader))->check($invocation);
+        return (new PostconditionContract($this->reader))->check($invocation);
     }
 
     /**
@@ -78,6 +78,6 @@ class ContractCheckerAspect implements Aspect
      */
     public function invariantContract(MethodInvocation $invocation)
     {
-        return (new InvariantChecker($this->reader))->check($invocation);
+        return (new InvariantContract($this->reader))->check($invocation);
     }
 }

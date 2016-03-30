@@ -8,35 +8,28 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect\ContractChecker;
+namespace PhpDeal\Contract;
 
 use Go\Aop\Intercept\MethodInvocation;
+use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionWithInheritDocFetcher;
 use PhpDeal\Exception\ContractViolation;
-use PhpDeal\Annotation\Ensure;
+use PhpDeal\Annotation\Verify;
 
-class PostConditionChecker extends ContractChecker
+class PreconditionContract extends Contract
 {
     /**
      * @param MethodInvocation $invocation
+     * @Before("@execution(PhpDeal\Annotation\Verify)")
      * @throws ContractViolation
-     * @return mixed
      */
     public function check(MethodInvocation $invocation)
     {
         $object = $invocation->getThis();
         $args   = $this->getMethodArguments($invocation);
-        $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
-            $args['__old'] = clone $object;
-        }
+        $scope  = $invocation->getMethod()->getDeclaringClass()->name;
 
-        $result = $invocation->proceed();
-        $args['__result'] = $result;
         $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
-
-        $this->fulfillContracts($allContracts, $object, $class->name, $args, $invocation);
-
-        return $result;
+        $this->fulfillContracts($allContracts, $object, $scope, $args, $invocation);
     }
 
     /**
@@ -46,8 +39,9 @@ class PostConditionChecker extends ContractChecker
     private function fetchAllContracts(MethodInvocation $invocation)
     {
         $allContracts = $this->fetchParentsContracts($invocation);
+
         foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
-            if ($annotation instanceof Ensure) {
+            if ($annotation instanceof Verify) {
                 $allContracts[] = $annotation;
             }
         }
@@ -61,12 +55,10 @@ class PostConditionChecker extends ContractChecker
      */
     private function fetchParentsContracts(MethodInvocation $invocation)
     {
-        return $this->getParentsContracts(
-            Ensure::class,
+        return (new MethodConditionWithInheritDocFetcher(Verify::class))->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
-            [],
             $invocation->getMethod()->getName()
         );
     }
-}
+} 

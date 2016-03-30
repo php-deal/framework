@@ -8,19 +8,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect\ContractChecker;
+namespace PhpDeal\Contract;
 
 use Go\Aop\Intercept\MethodInvocation;
+use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
-use PhpDeal\Annotation\Invariant;
-use ReflectionClass;
+use PhpDeal\Annotation\Ensure;
 
-class InvariantChecker extends ContractChecker
+class PostconditionContract extends Contract
 {
     /**
-     * Verifies invariants for contract class
-     *
-     * @Around("@within(PhpDeal\Annotation\Invariant) && execution(public **->*(*))")
      * @param MethodInvocation $invocation
      * @throws ContractViolation
      * @return mixed
@@ -36,22 +33,22 @@ class InvariantChecker extends ContractChecker
 
         $result = $invocation->proceed();
         $args['__result'] = $result;
+        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
 
-        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($class));
         $this->fulfillContracts($allContracts, $object, $class->name, $args, $invocation);
 
         return $result;
     }
 
     /**
-     * @param ReflectionClass $class
+     * @param MethodInvocation $invocation
      * @return array
      */
-    private function fetchAllContracts(ReflectionClass $class)
+    private function fetchAllContracts(MethodInvocation $invocation)
     {
-        $allContracts = $this->fetchParentsContracts($class);
-        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
-            if ($annotation instanceof Invariant) {
+        $allContracts = $this->fetchParentsContracts($invocation);
+        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+            if ($annotation instanceof Ensure) {
                 $allContracts[] = $annotation;
             }
         }
@@ -60,16 +57,15 @@ class InvariantChecker extends ContractChecker
     }
 
     /**
-     * @param ReflectionClass $class
+     * @param MethodInvocation $invocation
      * @return array
      */
-    private function fetchParentsContracts(ReflectionClass $class)
+    private function fetchParentsContracts(MethodInvocation $invocation)
     {
-        return $this->getParentsClassesContracts(
-            Invariant::class,
-            $class,
+        return (new MethodConditionFetcher(Ensure::class))->getConditions(
+            $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
-            []
+            $invocation->getMethod()->getName()
         );
     }
 } 

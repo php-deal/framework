@@ -8,13 +8,66 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect\ContractChecker;
+namespace PhpDeal\Contract;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Reader;
 use DomainException;
+use Go\Aop\Intercept\MethodInvocation;
+use PhpDeal\Contract\Fetcher\MethodArgument;
+use PhpDeal\Exception\ContractViolation;
 
-class SatisfiedContract
+abstract class Contract
 {
+    /**
+     * @var Reader|null
+     */
+    protected $reader = null;
+
+    /**
+     * @param Reader $reader Annotation reader
+     */
+    public function __construct(Reader $reader)
+    {
+        $this->reader = $reader;
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    protected function getMethodArguments(MethodInvocation $invocation)
+    {
+        return (new MethodArgument())->fetch($invocation);
+    }
+
+    /**
+     * @param array $allContracts
+     * @return array
+     */
+    protected function makeContractsUnique(array $allContracts)
+    {
+        return array_unique($allContracts);
+    }
+
+    /**
+     * @param array $allContracts
+     * @param object $instance
+     * @param string $scope
+     * @param array $args
+     * @param MethodInvocation $invocation
+     */
+    protected function fulfillContracts($allContracts, $instance, $scope, array $args, MethodInvocation $invocation)
+    {
+        foreach ($allContracts as $contract) {
+            try {
+                $this->ensureContractSatisfied($instance, $scope, $args, $contract);
+            } catch (\Exception $e) {
+                throw new ContractViolation($invocation, $contract->value, $e);
+            }
+        }
+    }
+
     /**
      * Returns a result of contract verification
      *

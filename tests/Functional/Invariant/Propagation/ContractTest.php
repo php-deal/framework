@@ -11,7 +11,7 @@
 namespace PhpDeal\Functional\Invariant\Propagation;
 
 /**
- * @group invariant
+ * @group propagation
  */
 class ContractTest extends \PHPUnit_Framework_TestCase
 {

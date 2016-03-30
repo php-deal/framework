@@ -8,11 +8,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Aspect\Fetcher;
+namespace PhpDeal\Contract\Fetcher;
 
 use Go\Aop\Intercept\MethodInvocation;
 
-class MethodArgumentsFetcher
+class MethodArgument
 {
     /**
      * Returns an associative list of arguments for the method invocation
@@ -22,11 +22,11 @@ class MethodArgumentsFetcher
      */
     public function fetch(MethodInvocation $invocation)
     {
-        $parameters    = $invocation->getMethod()->getParameters();
+        $parameters = $invocation->getMethod()->getParameters();
         $argumentNames = array_map(function (\ReflectionParameter $parameter) {
             return $parameter->name;
         }, $parameters);
-        $parameters    = array_combine($argumentNames, $invocation->getArguments());
+        $parameters = array_combine($argumentNames, $invocation->getArguments());
 
         return $parameters;
     }
