@@ -58,7 +58,7 @@ class PreconditionContract extends Contract
         return (new MethodConditionWithInheritDocFetcher(Verify::class))->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
-            $invocation->getMethod()->getName()
+            $invocation->getMethod()->name
         );
     }
 }

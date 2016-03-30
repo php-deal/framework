@@ -65,7 +65,7 @@ class PostconditionContract extends Contract
         return (new MethodConditionFetcher(Ensure::class))->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
-            $invocation->getMethod()->getName()
+            $invocation->getMethod()->name
         );
     }
 }

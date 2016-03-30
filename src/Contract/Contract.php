@@ -20,9 +20,9 @@ use PhpDeal\Exception\ContractViolation;
 abstract class Contract
 {
     /**
-     * @var Reader|null
+     * @var Reader
      */
-    protected $reader = null;
+    protected $reader;
 
     /**
      * @param Reader $reader Annotation reader
@@ -52,7 +52,7 @@ abstract class Contract
 
     /**
      * @param array $allContracts
-     * @param object $instance
+     * @param object|string $instance
      * @param string $scope
      * @param array $args
      * @param MethodInvocation $invocation
