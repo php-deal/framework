@@ -15,7 +15,6 @@ use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use Go\Lang\Annotation\Around;
 use Go\Lang\Annotation\Before;
-use PhpDeal\Annotation as Contract;
 use PhpDeal\Contract\InvariantContract;
 use PhpDeal\Contract\PostconditionContract;
 use PhpDeal\Contract\PreconditionContract;
@@ -26,9 +25,9 @@ class ContractCheckerAspect implements Aspect
     /**
      * Annotation reader
      *
-     * @var Reader|null
+     * @var Reader
      */
-    private $reader = null;
+    private $reader;
 
     /**
      * Default constructor
