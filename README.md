@@ -132,6 +132,76 @@ NOTE! The code in the invariant may not call any public non-static members of th
 indirectly. Doing so will result in a stack overflow, as the invariant will wind up being called in an
 infinitely recursive manner.
 
+Contract propagation
+----------
+
+For preconditions (Verify contract) classes do not inherit contracts of parents' methods. Example:
+
+```php
+
+    class Foo extends FooParent
+    {
+        /**
+         * @param int $amount
+         * @Contract\Verify("$variable != 1")
+         */
+        public function bar($amount)
+        {
+            ...
+        }
+    }
+    
+    class FooParent
+    {
+        /**
+         * @param int $amount
+         * @Contract\Verify("$variable != 2")
+         */
+        public function bar($amount)
+        {
+            ...
+        }
+    }
+    
+```
+
+Foo::bar accepts '2' literal as a parameter.
+
+For postconditions (Ensure contract) and Invariants classes inherit contracts. Example:
+
+```php
+    
+    /**
+     * @Contract\Invariant("$this->amount != 1")
+     */
+    class Foo extends FooParent
+    {
+        
+    }
+    
+    /**
+     * @Contract\Invariant("$this->amount != 2")
+     */
+    class FooParent
+    {
+        /**
+         * @var int
+         */
+        protected $amount;
+        
+        /**
+         * @param int $amount
+         */
+        protected function setBar($amount)
+        {
+            $this->amount = $amount;
+        }
+    }
+    
+```
+
+Foo::bar does not accept '1' and '2' literals as a parameter.
+
 Integration with assertion library
 ----------
 

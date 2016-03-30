@@ -56,7 +56,7 @@ class ContractTest extends \PHPUnit_Framework_TestCase
     {
         return [
             [
-                // StubParent does not accept this parameter, but Stub accepts
+                // StubParent does not accept this parameter, but Stub accepts (and we don't have inheritdoc annotation)
                 'parameter' => 2
             ]
         ];
