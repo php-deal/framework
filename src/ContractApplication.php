@@ -11,7 +11,9 @@ namespace PhpDeal;
 
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
-use PhpDeal\Aspect\ContractCheckerAspect;
+use PhpDeal\Aspect\InvariantCheckerAspect;
+use PhpDeal\Aspect\PostconditionCheckerAspect;
+use PhpDeal\Aspect\PreconditionCheckerAspect;
 
 /**
  * Main kernel class for enabling "design by contract" paradigm
@@ -29,6 +31,8 @@ class ContractApplication extends AspectKernel
     protected function configureAop(AspectContainer $container)
     {
         $reader = $container->get('aspect.annotation.reader');
-        $container->registerAspect(new ContractCheckerAspect($reader));
+        $container->registerAspect(new InvariantCheckerAspect($reader));
+        $container->registerAspect(new PostconditionCheckerAspect($reader));
+        $container->registerAspect(new PreconditionCheckerAspect($reader));
     }
 }

@@ -138,6 +138,112 @@ NOTE! The code in the invariant may not call any public non-static members of th
 indirectly. Doing so will result in a stack overflow, as the invariant will wind up being called in an
 infinitely recursive manner.
 
+Contract propagation
+----------
+
+For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have @inheritdoc annotation. Example:
+
+```php
+
+class Foo extends FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Verify("$amount != 1")
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+    
+class FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Verify("$amount != 2")
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+    
+```
+
+Foo::bar accepts '2' literal as a parameter and does not accept '1'.
+
+With @inheritdoc:
+
+```php
+
+class Foo extends FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Verify("$amount != 1")
+     * {@inheritdoc}
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+    
+class FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Verify("$amount != 2")
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+    
+```
+
+Foo::bar does not accept '1' and '2' literals as a parameter.
+
+
+
+
+For postconditions (Ensure and Invariants contracts) subclasses inherit contracts and they don't need @inheritdoc. Example:
+
+```php
+    
+/**
+ * @Contract\Invariant("$this->amount != 1")
+ */
+class Foo extends FooParent
+{
+    
+}
+
+/**
+ * @Contract\Invariant("$this->amount != 2")
+ */
+class FooParent
+{
+    /**
+     * @var int
+     */
+    protected $amount;
+    
+    /**
+     * @param int $amount
+     */
+    protected function setBar($amount)
+    {
+        $this->amount = $amount;
+    }
+}
+    
+```
+
+Foo::setBar does not accept '1' and '2' literals as a parameter.
+
 Integration with assertion library
 ----------
 

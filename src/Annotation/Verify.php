@@ -19,5 +19,8 @@ use Doctrine\Common\Annotations\Annotation as BaseAnnotation;
  */
 class Verify extends BaseAnnotation
 {
-
+    public function __toString()
+    {
+        return $this->value;
+    }
 }

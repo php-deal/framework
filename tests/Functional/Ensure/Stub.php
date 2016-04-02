@@ -8,17 +8,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Stub;
+namespace PhpDeal\Functional\Ensure;
 
 use PhpDeal\Annotation as Contract;
 use Go\Lang\Annotation\Pointcut;
 
-/**
- * Simple class for check "Ensure" logic of DbC
- */
-class EnsureStub
+class Stub
 {
-
     private $privateValue = 42;
 
     /**
@@ -26,6 +22,7 @@ class EnsureStub
      * @param float $amount
      *
      * @Contract\Ensure("$this->privateValue == $__old->privateValue + $amount")
+     * @Contract\Ensure("$this->privateValue > 0")
      */
     public function increment($amount)
     {
@@ -50,7 +47,7 @@ class EnsureStub
      */
     public function returnPrivateValue()
     {
-       return $this->privateValue;
+        return $this->privateValue;
     }
 
     /**

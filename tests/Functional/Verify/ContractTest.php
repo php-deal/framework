@@ -8,21 +8,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional;
+namespace PhpDeal\Functional\Verify;
 
-use PhpDeal\Stub\VerifyStub;
-
-class VerifyContractTest extends \PHPUnit_Framework_TestCase
+class ContractTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var VerifyStub
+     * @var Stub
      */
     private $stub;
 
     public function setUp()
     {
         parent::setUp();
-        $this->stub = new VerifyStub();
+        $this->stub = new Stub();
     }
 
     public function tearDown()
@@ -80,5 +78,38 @@ class VerifyContractTest extends \PHPUnit_Framework_TestCase
     public function testVerifyWithAssertInvalid($value)
     {
         $this->stub->add($value);
+    }
+
+    public function testVerifyManyContractsValid()
+    {
+        $this->stub->sub(10);
+    }
+
+    public function providerVerifyManyContractsInvalid()
+    {
+        return [
+            [
+                'value' => ""
+            ],
+            [
+                'value' => 1
+            ],
+            [
+                'value' => null
+            ],
+            [
+                'value' => []
+            ]
+        ];
+    }
+
+    /**
+     * @param mixed $value
+     * @dataProvider providerVerifyManyContractsInvalid
+     * @expectedException \PhpDeal\Exception\ContractViolation
+     */
+    public function testVerifyManyContractsInvalid($value)
+    {
+        $this->stub->sub($value);
     }
 }

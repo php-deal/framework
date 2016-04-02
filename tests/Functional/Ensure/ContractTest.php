@@ -8,21 +8,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional;
+namespace PhpDeal\Functional\Ensure;
 
-use PhpDeal\Stub\EnsureStub;
-
-class EnsureContractTest extends \PHPUnit_Framework_TestCase
+class ContractTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var EnsureStub
+     * @var Stub
      */
     private $stub;
 
     public function setUp()
     {
         parent::setUp();
-        $this->stub = new EnsureStub();
+        $this->stub = new Stub();
     }
 
     public function tearDown()
@@ -34,6 +32,14 @@ class EnsureContractTest extends \PHPUnit_Framework_TestCase
     public function testEnsureValid()
     {
         $this->stub->increment(50);
+    }
+
+    /**
+     * @expectedException \PhpDeal\Exception\ContractViolation
+     */
+    public function testEnsureManyContractsInvalid()
+    {
+        $this->stub->increment(-50);
     }
 
     /**

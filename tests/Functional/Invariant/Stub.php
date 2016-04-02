@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Stub;
+namespace PhpDeal\Functional\Invariant;
 
 use Go\Lang\Annotation\Aspect;
 use PhpDeal\Annotation as Contract;
@@ -19,7 +19,7 @@ use PhpDeal\Annotation as Contract;
  * @Contract\Invariant("$this->speed < 299792458 && $this->speed >= 0")
  * @Aspect("") // Just unused annotation
  */
-class Speed
+class Stub
 {
     private $speed = 0;
 
