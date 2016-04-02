@@ -10,6 +10,7 @@
 
 namespace PhpDeal\Contract;
 
+use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
@@ -17,6 +18,18 @@ use PhpDeal\Annotation\Ensure;
 
 class PostconditionContract extends Contract
 {
+    /**
+     * @var MethodConditionFetcher
+     */
+    private $methodConditionFetcher;
+
+    public function __construct(Reader $reader)
+    {
+        parent::__construct($reader);
+        $this->methodConditionFetcher = new MethodConditionFetcher(Ensure::class);
+    }
+
+
     /**
      * @param MethodInvocation $invocation
      * @throws ContractViolation
@@ -62,7 +75,7 @@ class PostconditionContract extends Contract
      */
     private function fetchParentsContracts(MethodInvocation $invocation)
     {
-        return (new MethodConditionFetcher(Ensure::class))->getConditions(
+        return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
             $invocation->getMethod()->name

@@ -10,6 +10,7 @@
 
 namespace PhpDeal\Contract;
 
+use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionWithInheritDocFetcher;
 use PhpDeal\Exception\ContractViolation;
@@ -17,6 +18,17 @@ use PhpDeal\Annotation\Verify;
 
 class PreconditionContract extends Contract
 {
+    /**
+     * @var MethodConditionWithInheritDocFetcher
+     */
+    private $methodConditionFetcher;
+
+    public function __construct(Reader $reader)
+    {
+        parent::__construct($reader);
+        $this->methodConditionFetcher = new MethodConditionWithInheritDocFetcher(Verify::class);
+    }
+
     /**
      * @param MethodInvocation $invocation
      * @Before("@execution(PhpDeal\Annotation\Verify)")
@@ -55,7 +67,7 @@ class PreconditionContract extends Contract
      */
     private function fetchParentsContracts(MethodInvocation $invocation)
     {
-        return (new MethodConditionWithInheritDocFetcher(Verify::class))->getConditions(
+        return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
             $this->reader,
             $invocation->getMethod()->name
