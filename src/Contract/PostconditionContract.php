@@ -29,7 +29,6 @@ class PostconditionContract extends Contract
         $this->methodConditionFetcher = new MethodConditionFetcher(Ensure::class);
     }
 
-
     /**
      * @param MethodInvocation $invocation
      * @throws ContractViolation
