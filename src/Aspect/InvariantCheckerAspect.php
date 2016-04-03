@@ -45,7 +45,7 @@ class InvariantCheckerAspect extends Contract implements Aspect
     public function invariantContract(MethodInvocation $invocation)
     {
         $object = $invocation->getThis();
-        $args   = $this->getMethodArguments($invocation);
+        $args   = $this->fetchMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
         if ($class->isCloneable()) {
             $args['__old'] = clone $object;

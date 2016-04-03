@@ -43,7 +43,7 @@ class PreconditionCheckerAspect extends Contract implements Aspect
     public function preConditionContract(MethodInvocation $invocation)
     {
         $object = $invocation->getThis();
-        $args   = $this->getMethodArguments($invocation);
+        $args   = $this->fetchMethodArguments($invocation);
         $scope  = $invocation->getMethod()->getDeclaringClass()->name;
 
         $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));

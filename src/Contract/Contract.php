@@ -14,7 +14,6 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
 use DomainException;
 use Go\Aop\Intercept\MethodInvocation;
-use PhpDeal\Contract\Fetcher\MethodArgument;
 use PhpDeal\Exception\ContractViolation;
 
 abstract class Contract
@@ -33,12 +32,20 @@ abstract class Contract
     }
 
     /**
+     * Returns an associative list of arguments for the method invocation
+     *
      * @param MethodInvocation $invocation
      * @return array
      */
-    protected function getMethodArguments(MethodInvocation $invocation)
+    protected function fetchMethodArguments(MethodInvocation $invocation)
     {
-        return (new MethodArgument())->fetch($invocation);
+        $parameters = $invocation->getMethod()->getParameters();
+        $argumentNames = array_map(function (\ReflectionParameter $parameter) {
+            return $parameter->name;
+        }, $parameters);
+        $parameters = array_combine($argumentNames, $invocation->getArguments());
+
+        return $parameters;
     }
 
     /**
