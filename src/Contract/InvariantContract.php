@@ -10,6 +10,7 @@
 
 namespace PhpDeal\Contract;
 
+use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Contract\Fetcher\ParentClass\InvariantFetcher;
 use PhpDeal\Exception\ContractViolation;
@@ -18,6 +19,17 @@ use ReflectionClass;
 
 class InvariantContract extends Contract
 {
+    /**
+     * @var InvariantFetcher
+     */
+    private $invariantFetcher;
+
+    public function __construct(Reader $reader)
+    {
+        parent::__construct($reader);
+        $this->invariantFetcher = new InvariantFetcher(Invariant::class);
+    }
+
     /**
      * Verifies invariants for contract class
      *
@@ -66,7 +78,7 @@ class InvariantContract extends Contract
      */
     private function fetchParentsContracts(ReflectionClass $class)
     {
-        return (new InvariantFetcher(Invariant::class))->getConditions(
+        return $this->invariantFetcher->getConditions(
             $class,
             $this->reader
         );
