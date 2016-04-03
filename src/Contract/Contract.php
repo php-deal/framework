@@ -58,33 +58,17 @@ abstract class Contract
     }
 
     /**
-     * @param array $allContracts
-     * @param object|string $instance
-     * @param string $scope
-     * @param array $args
-     * @param MethodInvocation $invocation
-     */
-    protected function fulfillContracts($allContracts, $instance, $scope, array $args, MethodInvocation $invocation)
-    {
-        foreach ($allContracts as $contract) {
-            try {
-                $this->ensureContractSatisfied($instance, $scope, $args, $contract);
-            } catch (\Exception $e) {
-                throw new ContractViolation($invocation, $contract->value, $e);
-            }
-        }
-    }
-
-    /**
-     * Returns a result of contract verification
+     * Performs verification of contracts for given invocation
      *
+     * @param MethodInvocation $invocation Current invocation
+     * @param array|Annotation[] $contracts Contract annotation
      * @param object|string $instance Invocation instance or string for static class
      * @param string $scope Scope of method
      * @param array $args List of arguments for the method
-     * @param Annotation $annotation Contract annotation
+     *
      * @throws DomainException
      */
-    public function ensureContractSatisfied($instance, $scope, array $args, $annotation)
+    protected function ensureContracts(MethodInvocation $invocation, array $contracts, $instance, $scope, array $args)
     {
         static $invoker = null;
         if (!$invoker) {
@@ -95,14 +79,28 @@ abstract class Contract
             };
         }
 
-        $instance = is_object($instance) ? $instance : null;
-        $invocationResult = $invoker->bindTo($instance, $scope)->__invoke($args, $annotation->value);
+        $instance     = is_object($instance) ? $instance : null;
+        $boundInvoker = $invoker->bindTo($instance, $scope);
 
-        // we accept as a result only true or null
-        // null may be a result of assertions from beberlei/assert which passed
-        if ($invocationResult !== null && $invocationResult !== true) {
-            $errorMessage = 'Invalid return value received from the assertion body, only boolean or void accepted';
-            throw new DomainException($errorMessage);
+        foreach ($contracts as $contract) {
+            $contractExpression = $contract->value;
+            try {
+                $invocationResult = $boundInvoker->__invoke($args, $contractExpression);
+
+                // we accept as a result only true or null
+                // null may be a result of assertions from beberlei/assert which passed
+                if ($invocationResult !== null && $invocationResult !== true) {
+                    $errorMessage = 'Invalid return value received from the assertion body,'
+                        . ' only boolean or void can be returned';
+                    throw new DomainException($errorMessage);
+                }
+
+            } catch (\Error $internalError) {
+                // PHP-7 friendly interceptor for fatal errors
+                throw new ContractViolation($invocation, $contractExpression, $internalError);
+            } catch (\Exception $internalException) {
+                throw new ContractViolation($invocation, $contractExpression, $internalException);
+            }
         }
     }
 }
