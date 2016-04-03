@@ -13,20 +13,23 @@ namespace PhpDeal\Aspect;
 use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
-use PhpDeal\Contract\PostconditionContract;
+use PhpDeal\Annotation\Ensure;
+use PhpDeal\Contract\Contract;
+use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
 
-class PostconditionCheckerAspect implements Aspect
+class PostconditionCheckerAspect extends Contract implements Aspect
 {
     /**
-     * @var PostconditionContract
+     * @var MethodConditionFetcher
      */
-    private $contractChecker;
+    private $methodConditionFetcher;
 
     public function __construct(Reader $reader)
     {
-        $this->contractChecker = new PostconditionContract($reader);
+        parent::__construct($reader);
+        $this->methodConditionFetcher = new MethodConditionFetcher(Ensure::class);
     }
 
     /**
@@ -40,6 +43,48 @@ class PostconditionCheckerAspect implements Aspect
      */
     public function postConditionContract(MethodInvocation $invocation)
     {
-        return $this->contractChecker->check($invocation);
+        $object = $invocation->getThis();
+        $args   = $this->getMethodArguments($invocation);
+        $class  = $invocation->getMethod()->getDeclaringClass();
+        if ($class->isCloneable()) {
+            $args['__old'] = clone $object;
+        }
+
+        $result = $invocation->proceed();
+        $args['__result'] = $result;
+        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
+
+        $this->fulfillContracts($allContracts, $object, $class->name, $args, $invocation);
+
+        return $result;
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchAllContracts(MethodInvocation $invocation)
+    {
+        $allContracts = $this->fetchParentsContracts($invocation);
+        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+            if ($annotation instanceof Ensure) {
+                $allContracts[] = $annotation;
+            }
+        }
+
+        return $allContracts;
+    }
+
+    /**
+     * @param MethodInvocation $invocation
+     * @return array
+     */
+    private function fetchParentsContracts(MethodInvocation $invocation)
+    {
+        return $this->methodConditionFetcher->getConditions(
+            $invocation->getMethod()->getDeclaringClass(),
+            $this->reader,
+            $invocation->getMethod()->name
+        );
     }
 }
