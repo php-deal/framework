@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Contract;
+namespace PhpDeal\Aspect;
 
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
@@ -16,7 +16,7 @@ use DomainException;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Exception\ContractViolation;
 
-abstract class Contract
+abstract class AbstractContractAspect
 {
     /**
      * @var Reader

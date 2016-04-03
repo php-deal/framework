@@ -14,12 +14,11 @@ use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Annotation\Verify;
-use PhpDeal\Contract\Contract;
 use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionWithInheritDocFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Before;
 
-class PreconditionCheckerAspect extends Contract implements Aspect
+class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
 {
     /**
      * @var MethodConditionWithInheritDocFetcher

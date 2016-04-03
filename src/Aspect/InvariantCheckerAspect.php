@@ -14,13 +14,12 @@ use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Annotation\Invariant;
-use PhpDeal\Contract\Contract;
 use PhpDeal\Contract\Fetcher\ParentClass\InvariantFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
 use ReflectionClass;
 
-class InvariantCheckerAspect extends Contract implements Aspect
+class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
 {
     /**
      * @var InvariantFetcher
