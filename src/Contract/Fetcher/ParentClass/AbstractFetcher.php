@@ -10,7 +10,9 @@
 
 namespace PhpDeal\Contract\Fetcher\ParentClass;
 
-class Fetcher
+use Doctrine\Common\Annotations\Reader;
+
+abstract class AbstractFetcher
 {
     /**
      * @var string
@@ -18,23 +20,32 @@ class Fetcher
     protected $expectedAnnotationType;
 
     /**
-     * @param string $expectedAnnotationType
+     * @var Reader
      */
-    public function __construct($expectedAnnotationType)
+    protected $annotationReader;
+
+    /**
+     * @param string $expectedAnnotationType
+     * @param Reader $reader
+     */
+    public function __construct($expectedAnnotationType, Reader $reader)
     {
         $this->expectedAnnotationType = $expectedAnnotationType;
+        $this->annotationReader       = $reader;
     }
 
     /**
+     * Performs filtering of annotations by the requested class name
+     *
      * @param array $annotations
      * @return array
      */
-    protected function getContractAnnotations(array $annotations)
+    protected function filterContractAnnotation(array $annotations)
     {
         $contractAnnotations = [];
 
         foreach ($annotations as $annotation) {
-            if (is_a($annotation, $this->expectedAnnotationType)) {
+            if ($annotation instanceof $this->expectedAnnotationType) {
                 $contractAnnotations[] = $annotation;
             }
         }

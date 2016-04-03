@@ -13,20 +13,23 @@ namespace PhpDeal\Aspect;
 use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
-use PhpDeal\Contract\InvariantContract;
+use PhpDeal\Annotation\Invariant;
+use PhpDeal\Contract\Fetcher\ParentClass\InvariantFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
+use ReflectionClass;
 
-class InvariantCheckerAspect implements Aspect
+class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
 {
     /**
-     * @var InvariantContract
+     * @var InvariantFetcher
      */
-    private $contractChecker;
+    private $invariantFetcher;
 
     public function __construct(Reader $reader)
     {
-        $this->contractChecker = new InvariantContract($reader);
+        parent::__construct($reader);
+        $this->invariantFetcher = new InvariantFetcher(Invariant::class, $reader);
     }
 
     /**
@@ -40,6 +43,35 @@ class InvariantCheckerAspect implements Aspect
      */
     public function invariantContract(MethodInvocation $invocation)
     {
-        return $this->contractChecker->check($invocation);
+        $object = $invocation->getThis();
+        $args   = $this->fetchMethodArguments($invocation);
+        $class  = $invocation->getMethod()->getDeclaringClass();
+        if ($class->isCloneable()) {
+            $args['__old'] = clone $object;
+        }
+
+        $result = $invocation->proceed();
+        $args['__result'] = $result;
+
+        $allContracts = $this->fetchAllContracts($class);
+        $this->ensureContracts($invocation, $allContracts, $object, $class->name, $args);
+
+        return $result;
+    }
+
+    /**
+     * @param ReflectionClass $class
+     * @return array
+     */
+    private function fetchAllContracts(ReflectionClass $class)
+    {
+        $allContracts = $this->invariantFetcher->getConditions($class);
+        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
+            if ($annotation instanceof Invariant) {
+                $allContracts[] = $annotation;
+            }
+        }
+
+        return array_unique($allContracts);
     }
 }
