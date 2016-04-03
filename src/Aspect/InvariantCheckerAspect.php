@@ -54,7 +54,7 @@ class InvariantCheckerAspect extends Contract implements Aspect
         $result = $invocation->proceed();
         $args['__result'] = $result;
 
-        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($class));
+        $allContracts = $this->fetchAllContracts($class);
         $this->ensureContracts($invocation, $allContracts, $object, $class->name, $args);
 
         return $result;
@@ -73,6 +73,6 @@ class InvariantCheckerAspect extends Contract implements Aspect
             }
         }
 
-        return $allContracts;
+        return array_unique($allContracts);
     }
 }

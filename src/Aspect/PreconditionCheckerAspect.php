@@ -46,7 +46,7 @@ class PreconditionCheckerAspect extends Contract implements Aspect
         $args   = $this->fetchMethodArguments($invocation);
         $scope  = $invocation->getMethod()->getDeclaringClass()->name;
 
-        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
+        $allContracts = $this->fetchAllContracts($invocation);
         $this->ensureContracts($invocation, $allContracts, $object, $scope, $args);
     }
 
@@ -64,7 +64,7 @@ class PreconditionCheckerAspect extends Contract implements Aspect
             }
         }
 
-        return $allContracts;
+        return array_unique($allContracts);
     }
 
     /**

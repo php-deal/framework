@@ -49,15 +49,6 @@ abstract class Contract
     }
 
     /**
-     * @param array $allContracts
-     * @return array
-     */
-    protected function makeContractsUnique(array $allContracts)
-    {
-        return array_unique($allContracts);
-    }
-
-    /**
      * Performs verification of contracts for given invocation
      *
      * @param MethodInvocation $invocation Current invocation

@@ -52,7 +52,7 @@ class PostconditionCheckerAspect extends Contract implements Aspect
 
         $result = $invocation->proceed();
         $args['__result'] = $result;
-        $allContracts = $this->makeContractsUnique($this->fetchAllContracts($invocation));
+        $allContracts = $this->fetchAllContracts($invocation);
 
         $this->ensureContracts($invocation, $allContracts, $object, $class->name, $args);
 
@@ -72,7 +72,7 @@ class PostconditionCheckerAspect extends Contract implements Aspect
             }
         }
 
-        return $allContracts;
+        return array_unique($allContracts);
     }
 
     /**
