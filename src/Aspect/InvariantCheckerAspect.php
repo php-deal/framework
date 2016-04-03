@@ -29,7 +29,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->invariantFetcher = new InvariantFetcher(Invariant::class);
+        $this->invariantFetcher = new InvariantFetcher(Invariant::class, $reader);
     }
 
     /**
@@ -65,7 +65,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
      */
     private function fetchAllContracts(ReflectionClass $class)
     {
-        $allContracts = $this->invariantFetcher->getConditions($class, $this->reader);
+        $allContracts = $this->invariantFetcher->getConditions($class);
         foreach ($this->reader->getClassAnnotations($class) as $annotation) {
             if ($annotation instanceof Invariant) {
                 $allContracts[] = $annotation;

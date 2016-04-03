@@ -10,31 +10,31 @@
 
 namespace PhpDeal\Contract\Fetcher\ParentClass;
 
-use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
 
-class MethodConditionFetcher extends Fetcher
+class MethodConditionFetcher extends AbstractFetcher
 {
     /**
+     * Fetches conditions from all parent method prototypes recursively
+     *
      * @param ReflectionClass $class
-     * @param Reader $reader
      * @param string $methodName
-     * @param array $contracts
+     *
      * @return array
      */
-    public function getConditions(ReflectionClass $class, Reader $reader, $methodName, array $contracts = [])
+    public function getConditions(ReflectionClass $class, $methodName)
     {
-        $parentClass = $class->getParentClass();
-
-        if (!$parentClass) {
-            return $contracts;
+        $annotations   = [];
+        $parentMethods = [];
+        while (($class = $class->getParentClass()) && $class->hasMethod($methodName)) {
+            $parentMethods[] = $class->getMethod($methodName);
         }
 
-        $parentMethod = $parentClass->getMethod($methodName);
-        $annotations = $reader->getMethodAnnotations($parentMethod);
-        $contractAnnotations = $this->getContractAnnotations($annotations);
-        $contracts = array_merge($contracts, $contractAnnotations);
+        foreach ($parentMethods as $parentMethod) {
+            $annotations = array_merge($annotations, $this->annotationReader->getMethodAnnotations($parentMethod));
+        }
+        $contracts = $this->filterContractAnnotation($annotations);
 
-        return $this->getConditions($parentClass, $reader, $methodName, $contracts);
+        return $contracts;
     }
 }

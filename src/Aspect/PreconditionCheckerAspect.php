@@ -28,7 +28,7 @@ class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->methodConditionFetcher = new MethodConditionWithInheritDocFetcher(Verify::class);
+        $this->methodConditionFetcher = new MethodConditionWithInheritDocFetcher(Verify::class, $reader);
     }
 
     /**
@@ -74,7 +74,6 @@ class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
     {
         return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
-            $this->reader,
             $invocation->getMethod()->name
         );
     }

@@ -28,7 +28,7 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->methodConditionFetcher = new MethodConditionFetcher(Ensure::class);
+        $this->methodConditionFetcher = new MethodConditionFetcher(Ensure::class, $reader);
     }
 
     /**
@@ -82,7 +82,6 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
     {
         return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
-            $this->reader,
             $invocation->getMethod()->name
         );
     }

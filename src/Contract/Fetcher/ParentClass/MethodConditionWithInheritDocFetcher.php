@@ -10,60 +10,35 @@
 
 namespace PhpDeal\Contract\Fetcher\ParentClass;
 
-use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
-use ReflectionMethod;
 
-class MethodConditionWithInheritDocFetcher extends Fetcher
+class MethodConditionWithInheritDocFetcher extends AbstractFetcher
 {
     /**
+     * Fetches conditions from all parent method prototypes recursively
+     *
      * @param ReflectionClass $class
-     * @param Reader $reader
      * @param string $methodName
-     * @param array $contracts
+     *
      * @return array
      */
-    public function getConditions(ReflectionClass $class, Reader $reader, $methodName, array $contracts = [])
+    public function getConditions(ReflectionClass $class, $methodName)
     {
-        if ($this->hasInheritDoc($class->getMethod($methodName))) {
-            return $this->getConditionsWithInheritDoc($class, $reader, $methodName, $contracts);
+        $annotations   = [];
+        $parentMethods = [];
+        while (
+            preg_match('/\@inheritdoc/i', $class->getMethod($methodName)->getDocComment())
+            && ($class = $class->getParentClass())
+            && $class->hasMethod($methodName)
+        ) {
+            $parentMethods[] = $class->getMethod($methodName);
         }
+
+        foreach ($parentMethods as $parentMethod) {
+            $annotations = array_merge($annotations, $this->annotationReader->getMethodAnnotations($parentMethod));
+        }
+        $contracts = $this->filterContractAnnotation($annotations);
 
         return $contracts;
-    }
-
-    /**
-     * @param ReflectionClass $class
-     * @param Reader $reader
-     * @param string $methodName
-     * @param array $contracts
-     * @return array
-     */
-    private function getConditionsWithInheritDoc(ReflectionClass $class, Reader $reader, $methodName, array $contracts)
-    {
-        $parentClass = $class->getParentClass();
-        if (!$parentClass) {
-            return $contracts;
-        }
-
-        $parentMethod = $parentClass->getMethod($methodName);
-        $annotations = $reader->getMethodAnnotations($parentMethod);
-        $contractAnnotations = $this->getContractAnnotations($annotations);
-        $contracts = array_merge($contracts, $contractAnnotations);
-
-        if ($this->hasInheritDoc($parentMethod)) {
-            return $this->getConditionsWithInheritDoc($parentClass, $reader, $methodName, $contracts);
-        }
-
-        return $contracts;
-    }
-
-    /**
-     * @param ReflectionMethod $method
-     * @return bool
-     */
-    private function hasInheritDoc(ReflectionMethod $method)
-    {
-        return preg_match('/\@inheritdoc/i', $method->getDocComment()) > 0;
     }
 }
