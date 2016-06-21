@@ -66,7 +66,11 @@ abstract class AbstractContractAspect
             $invoker = function () {
                 extract(func_get_arg(0));
 
-                return eval('return ' . func_get_arg(1) . '; ?>');
+                try {
+                    return eval('return ' . $contractExpression . '; ?>');
+                } catch (\Throwable $e) {
+                    throw new \InvalidArgumentException('PHP Syntax error in ' . $contractExpression);
+                }
             };
         }
 
