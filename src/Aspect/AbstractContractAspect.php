@@ -88,7 +88,10 @@ abstract class AbstractContractAspect
 
             } catch (\Error $internalError) {
                 // PHP-7 friendly interceptor for fatal errors
-                throw new ContractViolation($invocation, $contractExpression, $internalError);
+                throw new ContractViolation($invocation, $contractExpression, new \Exception(
+                    $internalError->getMessage(),
+                    $internalError->getCode()
+                ));
             } catch (\Exception $internalException) {
                 throw new ContractViolation($invocation, $contractExpression, $internalException);
             }
