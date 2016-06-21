@@ -43,7 +43,15 @@ abstract class AbstractContractAspect
         $argumentNames = array_map(function (\ReflectionParameter $parameter) {
             return $parameter->name;
         }, $parameters);
-        $parameters = array_combine($argumentNames, $invocation->getArguments());
+        
+        $parameters = [];
+        $argumentValues = $invocation->getArguments();
+
+        foreach ($argumentNames as $i => $name) {
+            $parameters[$name] = isset($argumentValues[$i]) 
+                ? $argumentValues[$i]
+                : null;
+        }
 
         return $parameters;
     }
