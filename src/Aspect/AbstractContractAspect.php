@@ -48,7 +48,7 @@ abstract class AbstractContractAspect
         $argumentValues = $invocation->getArguments();
 
         foreach ($argumentNames as $i => $name) {
-            $parameters[$name] = isset($argumentValues[$i]) 
+            $parameters[$name] = isset($argumentValues[$i])
                 ? $argumentValues[$i]
                 : null;
         }
