@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Ensure\Propagation;
+namespace PhpDeal\Functional\Ensure\ClassPropagation;
 
 /**
  * @group propagation

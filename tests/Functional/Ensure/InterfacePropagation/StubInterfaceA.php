@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHP Deal framework
  *
@@ -8,17 +9,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Ensure\Propagation;
+namespace PhpDeal\Functional\Ensure\InterfacePropagation;
 
 use PhpDeal\Annotation as Contract;
 
-abstract class StubParent extends StubGrandparent
+interface StubInterfaceA
 {
     /**
-     * @Contract\Ensure("$this->value !== 2")
+     * @Contract\Ensure("$this->value !== -1")
+     * @param int $variable
      */
-    public function add($variable)
-    {
-        $this->value += $variable;
-    }
+    public function add($variable);
 }
