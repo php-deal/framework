@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Contract\Fetcher\ParentClass;
+namespace PhpDeal\Contract\Fetcher\Parent;
 
 use ReflectionClass;
 
@@ -25,9 +25,9 @@ class InvariantFetcher extends AbstractFetcher
     {
         $annotations   = [];
         $parentClasses = [];
-        while ($class = $class->getParentClass()) {
-            $parentClasses[] = $class;
-        }
+
+        $this->getParentClass($class, $parentClasses);
+        $this->getInterfaces($class, $parentClasses);
 
         foreach ($parentClasses as $parentClass) {
             $annotations = array_merge($annotations, $this->annotationReader->getClassAnnotations($parentClass));
@@ -35,5 +35,29 @@ class InvariantFetcher extends AbstractFetcher
         $contracts = $this->filterContractAnnotation($annotations);
 
         return $contracts;
+    }
+
+    /**
+     * @param ReflectionClass $class
+     * @param array $parentClasses
+     */
+    private function getParentClass(ReflectionClass $class, &$parentClasses)
+    {
+        while ($class = $class->getParentClass()) {
+            $parentClasses[] = $class;
+        }
+    }
+
+    /**
+     * @param ReflectionClass $class
+     * @param array $parentClasses
+     */
+    private function getInterfaces(ReflectionClass $class, &$parentClasses)
+    {
+        $interfaces = $class->getInterfaces();
+
+        foreach ($interfaces as $interface) {
+            $parentClasses[] = $interface;
+        }
     }
 }

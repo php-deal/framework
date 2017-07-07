@@ -14,7 +14,7 @@ use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Annotation\Invariant;
-use PhpDeal\Contract\Fetcher\ParentClass\InvariantFetcher;
+use PhpDeal\Contract\Fetcher\Parent\InvariantFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
 use ReflectionClass;

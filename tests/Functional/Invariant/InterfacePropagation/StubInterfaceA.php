@@ -8,14 +8,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Invariant\Propagation;
+namespace PhpDeal\Functional\Invariant\InterfacePropagation;
 
 use PhpDeal\Annotation as Contract;
 
 /**
- * @Contract\Invariant("$this->variable != 3")
+ * @Contract\Invariant("$this->variable != 2")
  */
-abstract class StubGrandparent
+interface StubInterfaceA
 {
 
 }
