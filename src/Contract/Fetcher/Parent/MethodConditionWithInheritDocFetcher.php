@@ -27,7 +27,7 @@ class MethodConditionWithInheritDocFetcher extends AbstractFetcher
         $annotations   = [];
         $parentMethods = [];
         if (preg_match('/\@inheritdoc/i', $class->getMethod($methodName)->getDocComment())) {
-            $this->getParentClassMethods($class, $methodName, $parentMethods);
+            $this->getParentClassesMethods($class, $methodName, $parentMethods);
             $this->getInterfacesMethods($class, $methodName, $parentMethods);
         }
 
@@ -44,7 +44,7 @@ class MethodConditionWithInheritDocFetcher extends AbstractFetcher
      * @param string $methodName
      * @param array $parentMethods
      */
-    private function getParentClassMethods(ReflectionClass $class, $methodName, &$parentMethods)
+    private function getParentClassesMethods(ReflectionClass $class, $methodName, &$parentMethods)
     {
         while (($class = $class->getParentClass()) && $class->hasMethod($methodName)) {
             $parentMethods[] = $class->getMethod($methodName);

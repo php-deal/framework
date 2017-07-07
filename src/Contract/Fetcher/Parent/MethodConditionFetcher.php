@@ -27,7 +27,7 @@ class MethodConditionFetcher extends AbstractFetcher
         $annotations   = [];
         $parentMethods = [];
 
-        $this->getParentClassMethods($class, $methodName, $parentMethods);
+        $this->getParentClassesMethods($class, $methodName, $parentMethods);
         $this->getInterfacesMethods($class, $methodName, $parentMethods);
 
         foreach ($parentMethods as $parentMethod) {
@@ -43,7 +43,7 @@ class MethodConditionFetcher extends AbstractFetcher
      * @param string $methodName
      * @param array $parentMethods
      */
-    private function getParentClassMethods(ReflectionClass $class, $methodName, &$parentMethods)
+    private function getParentClassesMethods(ReflectionClass $class, $methodName, &$parentMethods)
     {
         while (($class = $class->getParentClass()) && $class->hasMethod($methodName)) {
             $parentMethods[] = $class->getMethod($methodName);

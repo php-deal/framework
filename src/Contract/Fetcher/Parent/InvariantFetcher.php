@@ -24,13 +24,13 @@ class InvariantFetcher extends AbstractFetcher
     public function getConditions(ReflectionClass $class)
     {
         $annotations   = [];
-        $parentClasses = [];
+        $parents = [];
 
-        $this->getParentClass($class, $parentClasses);
-        $this->getInterfaces($class, $parentClasses);
+        $this->getParentClasses($class, $parents);
+        $this->getInterfaces($class, $parents);
 
-        foreach ($parentClasses as $parentClass) {
-            $annotations = array_merge($annotations, $this->annotationReader->getClassAnnotations($parentClass));
+        foreach ($parents as $parent) {
+            $annotations = array_merge($annotations, $this->annotationReader->getClassAnnotations($parent));
         }
         $contracts = $this->filterContractAnnotation($annotations);
 
@@ -39,25 +39,25 @@ class InvariantFetcher extends AbstractFetcher
 
     /**
      * @param ReflectionClass $class
-     * @param array $parentClasses
+     * @param array $parents
      */
-    private function getParentClass(ReflectionClass $class, &$parentClasses)
+    private function getParentClasses(ReflectionClass $class, &$parents)
     {
         while ($class = $class->getParentClass()) {
-            $parentClasses[] = $class;
+            $parents[] = $class;
         }
     }
 
     /**
      * @param ReflectionClass $class
-     * @param array $parentClasses
+     * @param array $parents
      */
-    private function getInterfaces(ReflectionClass $class, &$parentClasses)
+    private function getInterfaces(ReflectionClass $class, &$parents)
     {
         $interfaces = $class->getInterfaces();
 
         foreach ($interfaces as $interface) {
-            $parentClasses[] = $interface;
+            $parents[] = $interface;
         }
     }
 }
