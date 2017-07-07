@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Verify\ClassPropagation;
 
 use PhpDeal\Annotation as Contract;
 

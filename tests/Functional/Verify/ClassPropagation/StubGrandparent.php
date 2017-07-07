@@ -8,19 +8,18 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Verify\ClassPropagation;
 
 use PhpDeal\Annotation as Contract;
 
-abstract class StubParentWithInheritDoc extends StubGrandparent
+class StubGrandparent
 {
     /**
      * @param int $variable
-     * @Contract\Verify("$variable !== 2")
-     * @inheritdoc
+     * @Contract\Verify("$variable !== 3")
      */
     public function add($variable)
     {
 
     }
-} 
+}

@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Verify\InterfacePropagation;
 
 /**
  * @group propagation
@@ -41,11 +41,11 @@ class ContractWithInheritDocTest extends \PHPUnit_Framework_TestCase
                 'parameter' => 1
             ],
             [
-                // StubParentWithInheritDoc can't accept this value
+                // StubInterfaceA can't accept this value
                 'parameter' => 2
             ],
             [
-                // StubGrandparent can't accept this value
+                // StubInterfaceB can't accept this value
                 'parameter' => 3
             ]
         ];
