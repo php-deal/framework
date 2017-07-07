@@ -141,6 +141,8 @@ infinitely recursive manner.
 Contract propagation
 ----------
 
+Contact propagation is to inherit contracts from parent classes and interfaces.
+
 For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have @inheritdoc annotation. Example:
 
 ```php
