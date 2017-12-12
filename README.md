@@ -25,10 +25,10 @@ then the new specification is compatible with the old, and will not break the ca
 
 [![Build Status](https://api.travis-ci.org/php-deal/framework.png?branch=master)](https://travis-ci.org/php-deal/framework)
 [![GitHub release](https://img.shields.io/github/release/php-deal/framework.svg)](https://github.com/php-deal/framework/releases/latest)
-[![Code Coverage](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
-[![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.5-8892BF.svg)](https://php.net/)
-[![License](https://img.shields.io/packagist/l/lisachenko/php-deal.svg)](https://packagist.org/packages/lisachenko/php-deal)
+[![Code Coverage](https://scrutinizer-ci.com/g/php-deal/framework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/php-deal/framework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=master)
+[![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg)](https://php.net/)
+[![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
 Installation
 ------------
 
