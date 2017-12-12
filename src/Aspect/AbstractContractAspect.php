@@ -43,7 +43,15 @@ abstract class AbstractContractAspect
         $argumentNames = array_map(function (\ReflectionParameter $parameter) {
             return $parameter->name;
         }, $parameters);
-        $parameters = array_combine($argumentNames, $invocation->getArguments());
+        
+        $parameters = [];
+        $argumentValues = $invocation->getArguments();
+
+        foreach ($argumentNames as $i => $name) {
+            $parameters[$name] = isset($argumentValues[$i])
+                ? $argumentValues[$i]
+                : null;
+        }
 
         return $parameters;
     }
@@ -66,7 +74,11 @@ abstract class AbstractContractAspect
             $invoker = function () {
                 extract(func_get_arg(0));
 
-                return eval('return ' . func_get_arg(1) . '; ?>');
+                try {
+                    return eval('return ' . $contractExpression . '; ?>');
+                } catch (\Throwable $e) {
+                    throw new \InvalidArgumentException('PHP Syntax error in ' . $contractExpression);
+                }
             };
         }
 
@@ -88,7 +100,10 @@ abstract class AbstractContractAspect
 
             } catch (\Error $internalError) {
                 // PHP-7 friendly interceptor for fatal errors
-                throw new ContractViolation($invocation, $contractExpression, $internalError);
+                throw new ContractViolation($invocation, $contractExpression, new \Exception(
+                    $internalError->getMessage(),
+                    $internalError->getCode()
+                ));
             } catch (\Exception $internalException) {
                 throw new ContractViolation($invocation, $contractExpression, $internalException);
             }
