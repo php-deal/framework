@@ -6,7 +6,8 @@
         "beberlei/assert": "^2.4"
     },
     "require-dev": {
-        "symfony/console": "~2.7|~3.0"
+        "symfony/console": "~2.7|~3.0",
+        "phpunit/phpunit": "^5.7"
     },
     "license": "MIT",
     "authors": [
@@ -23,6 +24,7 @@
         "psr-4": {"PhpDeal\\": "src/"}
     },
     "autoload-dev": {
-        "psr-0": {"Demo\\": "demo/"}
+        "psr-0": {"Demo\\": "demo/"},
+        "psr-4": {"PhpDeal\\": "tests/"}
     }
 }
