@@ -1,8 +1,8 @@
 {
-    "name": "lisachenko/php-deal",
+    "name": "php-deal/framework",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "goaop/framework": "~1.0|~2.0@dev",
+        "goaop/framework": "~2.0",
         "beberlei/assert": "^2.4"
     },
     "require-dev": {
@@ -13,6 +13,10 @@
         {
             "name": "Alexander Lisachenko",
             "email": "lisachenko.it@gmail.com"
+        },
+        {
+            "name": "Piotr Dawidiuk",
+            "email": "piotr.dawidiuk@gmail.com"
         }
     ],
     "autoload": {
