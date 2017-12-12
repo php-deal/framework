@@ -87,9 +87,9 @@ class Account
 }
 ```
 
-By definition, if a pre contract fails, then the body received bad parameters. An ContractViolation exception
+By definition, if a pre contract fails, then the body received bad parameters. A ContractViolation exception
 is thrown.
-If a post contract fails, then there is a bug in the body. An ContractViolation exception is thrown.
+If a post contract fails, then there is a bug in the body. A ContractViolation exception is thrown.
 
 Invariants
 ----------
@@ -141,9 +141,10 @@ infinitely recursive manner.
 Contract propagation
 ----------
 
-Contact propagation is to inherit contracts from parent classes and interfaces.
+All contracts are propagated from parent classes and interfaces.
 
-For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have @inheritdoc annotation. Example:
+For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have the @inheritdoc annotation. Example:
+
 
 ```php
 
