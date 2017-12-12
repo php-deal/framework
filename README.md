@@ -29,6 +29,7 @@ then the new specification is compatible with the old, and will not break the ca
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/php-deal/framework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=master)
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg)](https://php.net/)
 [![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
+
 Installation
 ------------
 
@@ -36,7 +37,7 @@ PhpDeal framework can be installed with composer. Installation is quite easy, ju
 the framework with its dependencies by running the command:
 
 ``` bash
-$ php composer.phar require lisachenko/php-deal
+$ composer require php-deal/framework
 ```
 
 IDE Integration
