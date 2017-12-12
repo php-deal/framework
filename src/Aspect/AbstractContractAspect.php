@@ -39,13 +39,22 @@ abstract class AbstractContractAspect
      */
     protected function fetchMethodArguments(MethodInvocation $invocation)
     {
-        $parameters = $invocation->getMethod()->getParameters();
-        $argumentNames = array_map(function (\ReflectionParameter $parameter) {
-            return $parameter->name;
-        }, $parameters);
-        $parameters = array_combine($argumentNames, $invocation->getArguments());
+        $result         = [];
+        $parameters     = $invocation->getMethod()->getParameters();
+        $argumentValues = $invocation->getArguments();
 
-        return $parameters;
+        // Number of arguments can be less than number of parameters because of default values
+        foreach ($parameters as $parameterIndex => $reflectionParameter) {
+            $hasArgumentValue = array_key_exists($parameterIndex, $argumentValues);
+            $argumentValue    = $hasArgumentValue ? $argumentValues[$parameterIndex] : null;
+            if (!$hasArgumentValue && $reflectionParameter->isDefaultValueAvailable()) {
+                $argumentValue = $reflectionParameter->getDefaultValue();
+            }
+            $result[$reflectionParameter->name] = $argumentValue;
+
+        }
+
+        return $result;
     }
 
     /**
