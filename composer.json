@@ -2,6 +2,7 @@
     "name": "php-deal/framework",
     "description": "Design by Contract framework for PHP",
     "require": {
+        "php": ">=5.6.0",
         "goaop/framework": "~2.0",
         "beberlei/assert": "^2.4"
     },
