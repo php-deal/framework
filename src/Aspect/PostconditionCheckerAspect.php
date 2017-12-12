@@ -14,7 +14,7 @@ use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
 use PhpDeal\Annotation\Ensure;
-use PhpDeal\Contract\Fetcher\ParentClass\MethodConditionFetcher;
+use PhpDeal\Contract\Fetcher\Parent\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
 

@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Contract\Fetcher\ParentClass;
+namespace PhpDeal\Contract\Fetcher\Parent;
 
 use Doctrine\Common\Annotations\Reader;
 

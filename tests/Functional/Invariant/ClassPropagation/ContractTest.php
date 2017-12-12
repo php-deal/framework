@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Ensure\Propagation;
+namespace PhpDeal\Functional\Invariant\ClassPropagation;
 
 /**
  * @group propagation
@@ -32,49 +32,49 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function providerEnsureValid()
+    public function providerInvariantValid()
     {
         return [
             [
-                'variable' => 50,
+                'variable' => 4
             ]
         ];
     }
 
     /**
      * @param int $variable
-     * @dataProvider providerEnsureValid
+     * @dataProvider providerInvariantValid
      */
-    public function testEnsureValid($variable)
+    public function testInvariantValid($variable)
     {
-        $this->stub->add($variable);
+        $this->stub->setVariable($variable);
     }
 
-    public function providerEnsureInvalid()
+    public function providerInvariantInvalid()
     {
         return [
             [
-                // invalid for Stub
+                // restriction of Stub
                 'variable' => 1
             ],
             [
-                // invalid for StubParent
+                // restriction of StubParent
                 'variable' => 2
             ],
             [
-                // invalid for StubGrandparent
-                'variable' => -1
+                // restriction of StubGrandparent
+                'variable' => 3
             ],
         ];
     }
 
     /**
      * @param int $variable
-     * @dataProvider providerEnsureInvalid
+     * @dataProvider providerInvariantInvalid
      * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testEnsureInvalid($variable)
+    public function testInvariantInvalid($variable)
     {
-        $this->stub->add($variable);
+        $this->stub->setVariable($variable);
     }
 }

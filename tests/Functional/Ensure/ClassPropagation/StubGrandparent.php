@@ -8,15 +8,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Ensure\ClassPropagation;
 
 use PhpDeal\Annotation as Contract;
 
-class Stub extends StubParent
+class StubGrandparent
 {
     /**
-     * @param int $variable
-     * @Contract\Verify("$variable !== 1")
+     * @var int
+     */
+    protected $value;
+
+    /**
+     * @Contract\Ensure("$this->value !== -1")
      */
     public function add($variable)
     {

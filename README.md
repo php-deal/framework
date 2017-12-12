@@ -23,8 +23,8 @@ break a caller, C++ FAQs uses the memorable phrase "require no more, promise no 
 does not require more from the caller than before, and if it does not promise to deliver less than before,
 then the new specification is compatible with the old, and will not break the caller.
 
-[![Build Status](https://secure.travis-ci.org/lisachenko/php-deal.png?branch=master)](https://travis-ci.org/lisachenko/php-deal)
-[![GitHub release](https://img.shields.io/github/release/lisachenko/php-deal.svg)](https://github.com/lisachenko/php-deal/releases/latest)
+[![Build Status](https://api.travis-ci.org/php-deal/framework.png?branch=master)](https://travis-ci.org/php-deal/framework)
+[![GitHub release](https://img.shields.io/github/release/php-deal/framework.svg)](https://github.com/php-deal/framework/releases/latest)
 [![Code Coverage](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/lisachenko/php-deal/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lisachenko/php-deal/?branch=master)
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.5-8892BF.svg)](https://php.net/)
@@ -141,7 +141,10 @@ infinitely recursive manner.
 Contract propagation
 ----------
 
+All contracts are propagated from parent classes and interfaces.
+
 For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have the @inheritdoc annotation. Example:
+
 
 ```php
 

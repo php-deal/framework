@@ -8,19 +8,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Invariant\InterfacePropagation;
 
 use PhpDeal\Annotation as Contract;
 
-abstract class StubParentWithInheritDoc extends StubGrandparent
+/**
+ * @Contract\Invariant("$this->variable != 2")
+ */
+interface StubInterfaceA
 {
-    /**
-     * @param int $variable
-     * @Contract\Verify("$variable !== 2")
-     * @inheritdoc
-     */
-    public function add($variable)
-    {
 
-    }
-} 
+}

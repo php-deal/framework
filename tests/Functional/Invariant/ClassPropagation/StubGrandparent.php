@@ -8,22 +8,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Ensure\Propagation;
+namespace PhpDeal\Functional\Invariant\ClassPropagation;
 
 use PhpDeal\Annotation as Contract;
 
-class StubGrandparent
+/**
+ * @Contract\Invariant("$this->variable != 3")
+ */
+abstract class StubGrandparent
 {
-    /**
-     * @var int
-     */
-    protected $value;
 
-    /**
-     * @Contract\Ensure("$this->value !== -1")
-     */
-    public function add($variable)
-    {
-
-    }
 }

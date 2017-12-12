@@ -8,15 +8,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace PhpDeal\Functional\Verify\Propagation;
+namespace PhpDeal\Functional\Verify\InterfacePropagation;
 
 use PhpDeal\Annotation as Contract;
 
-class StubGrandparent
+class Stub implements StubInterfaceA, StubInterfaceB
 {
     /**
      * @param int $variable
-     * @Contract\Verify("$variable !== 3")
+     * @Contract\Verify("$variable !== 1")
      */
     public function add($variable)
     {
