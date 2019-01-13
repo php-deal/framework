@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -28,17 +30,14 @@ class ContractViolation extends \LogicException
      */
     public function __construct(MethodInvocation $invocation, $contract, Exception $previous = null)
     {
-        $obj       = $invocation->getThis();
-        $objName   = is_object($obj) ? get_class($obj) : $obj;
-        $method    = $invocation->getMethod();
-//        $arguments = implode(', ', $invocation->getArguments());
+        $obj        = $invocation->getThis();
+        $objName    = \is_object($obj) ? \get_class($obj) : $obj;
+        $method     = $invocation->getMethod();
 
-//        $message = "Contract {$contract} violated with {$arguments} for {$objName}->{$method->name}";
         $message = "Contract {$contract} violated for {$objName}->{$method->name}";
         parent::__construct($message, 0, $previous);
 
         $this->file = $method->getFileName();
         $this->line = $method->getStartLine() + 1;
     }
-
 }

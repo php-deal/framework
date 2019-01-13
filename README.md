@@ -23,11 +23,11 @@ break a caller, C++ FAQs uses the memorable phrase "require no more, promise no 
 does not require more from the caller than before, and if it does not promise to deliver less than before,
 then the new specification is compatible with the old, and will not break the caller.
 
-[![Build Status](https://api.travis-ci.org/php-deal/framework.png?branch=master)](https://travis-ci.org/php-deal/framework)
+[![Build Status](https://api.travis-ci.org/php-deal/framework.png?branch=1.x)](https://travis-ci.org/php-deal/framework)
 [![GitHub release](https://img.shields.io/github/release/php-deal/framework.svg)](https://github.com/php-deal/framework/releases/latest)
-[![Code Coverage](https://scrutinizer-ci.com/g/php-deal/framework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/php-deal/framework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=master)
-[![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg)](https://php.net/)
+[![Code Coverage](https://scrutinizer-ci.com/g/php-deal/framework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=1.x)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/php-deal/framework/badges/quality-score.png?b=1.x)](https://scrutinizer-ci.com/g/php-deal/framework/?branch=1.x)
+[![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D7.2-blue.svg)](https://php.net/)
 [![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
 
 Installation

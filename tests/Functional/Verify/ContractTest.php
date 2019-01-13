@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -10,7 +12,10 @@
 
 namespace PhpDeal\Functional\Verify;
 
-class ContractTest extends \PHPUnit_Framework_TestCase
+use PhpDeal\Exception\ContractViolation;
+use PHPUnit\Framework\TestCase;
+
+class ContractTest extends TestCase
 {
     /**
      * @var Stub
@@ -29,87 +34,60 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function testVerifyValid()
+    public function testVerifyValid(): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->testNumeric(-200);
     }
 
-    /**
-     * @expectedException \PhpDeal\Exception\ContractViolation
-     */
-    public function testVerifyInvalid()
+    public function testAccessToPrivateFields(): void
     {
-        $this->stub->testNumeric('message');
-    }
-
-    public function testAccessToPrivateFields()
-    {
+        $this->expectNotToPerformAssertions();
         $this->stub->testAccessToPrivateField(50);
     }
 
-    public function testVerifyWithAssertValid()
+    public function testVerifyWithAssertValid(): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->add(100);
     }
 
-    public function providerVerifyWithAssertInvalid()
-    {
-        return [
-            [
-                'value' => ""
-            ],
-            [
-                'value' => 5.5
-            ],
-            [
-                'value' => null
-            ],
-            [
-                'value' => []
-            ]
-        ];
-    }
-
     /**
-     * @param mixed $value
-     * @dataProvider providerVerifyWithAssertInvalid
-     * @expectedException \PhpDeal\Exception\ContractViolation
+     * This test should fail with php TypeError.
      */
-    public function testVerifyWithAssertInvalid($value)
+    public function testVerifyWithAssertInvalid(): void
     {
-        $this->stub->add($value);
+        $this->expectException(ContractViolation::class);
+        $this->stub->add(1);
     }
 
-    public function testVerifyManyContractsValid()
+    public function testVerifyManyContractsValid(): void
     {
-        $this->stub->sub(10);
+        $this->expectNotToPerformAssertions();
+        $this->stub->sub(9);
     }
 
-    public function providerVerifyManyContractsInvalid()
+    public function providerVerifyManyContractsInvalid(): array
     {
         return [
             [
-                'value' => ""
+                'value' => 11
             ],
             [
                 'value' => 1
             ],
-            [
-                'value' => null
-            ],
-            [
-                'value' => []
-            ]
         ];
     }
 
     /**
-     * @param mixed $value
+     * This test should fail with php TypeError.
+     *
+     * @param mixed  $value
      * @dataProvider providerVerifyManyContractsInvalid
-     * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testVerifyManyContractsInvalid($value)
+    public function testVerifyManyContractsInvalid($value): void
     {
-        $this->stub->sub($value);
+        $this->expectException(ContractViolation::class);
+        $this->stub->sub(1);
     }
 }

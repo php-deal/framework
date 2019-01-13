@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -39,6 +41,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
      * @param MethodInvocation $invocation
      *
      * @throws ContractViolation
+     * @throws \ReflectionException
      * @return mixed
      */
     public function invariantContract(MethodInvocation $invocation)
@@ -63,7 +66,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
      * @param ReflectionClass $class
      * @return array
      */
-    private function fetchAllContracts(ReflectionClass $class)
+    private function fetchAllContracts(ReflectionClass $class): array
     {
         $allContracts = $this->invariantFetcher->getConditions($class);
         foreach ($this->reader->getClassAnnotations($class) as $annotation) {
@@ -72,6 +75,6 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
             }
         }
 
-        return array_unique($allContracts);
+        return \array_unique($allContracts);
     }
 }
