@@ -268,3 +268,25 @@ To enhance capabilities of contracts, it's possible to use [assertion library](h
 
 [More assertions](https://github.com/beberlei/assert#list-of-assertions)
 
+Common issues
+-----------
+
+##### Fatal error: Uncaught Error: Class 'Go\ParserReflection\Instrument\PathResolver'
+```php
+Fatal error: Uncaught Error: Class 'Go\ParserReflection\Instrument\PathResolver' 
+not found in .../vendor/goaop/parser-reflection/src/ReflectionEngine.php on line XXX
+```
+
+This happens if your `appDir` configuration points at the same level as your `vendor` directory.
+To solve this issue try adding your `vendor` folder into the `excludePaths` configuration.
+
+```php
+ContractApplication::getInstance()->init(array(
+    'debug'    => true,
+    'appDir'   => __DIR__,,
+    'exludePaths' => [
+        __DIR__ . '/vendor'
+    ],
+    'cacheDir' => __DIR__.'/cache/',
+));
+```
