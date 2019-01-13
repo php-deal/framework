@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -28,7 +30,7 @@ abstract class AbstractFetcher
      * @param string $expectedAnnotationType
      * @param Reader $reader
      */
-    public function __construct($expectedAnnotationType, Reader $reader)
+    public function __construct(string $expectedAnnotationType, Reader $reader)
     {
         $this->expectedAnnotationType = $expectedAnnotationType;
         $this->annotationReader       = $reader;
@@ -40,7 +42,7 @@ abstract class AbstractFetcher
      * @param array $annotations
      * @return array
      */
-    protected function filterContractAnnotation(array $annotations)
+    protected function filterContractAnnotation(array $annotations): array
     {
         $contractAnnotations = [];
 

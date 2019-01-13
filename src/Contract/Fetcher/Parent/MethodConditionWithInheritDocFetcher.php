@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -18,33 +20,38 @@ class MethodConditionWithInheritDocFetcher extends AbstractFetcher
      * Fetches conditions from all parent method prototypes recursively
      *
      * @param ReflectionClass $class
-     * @param string $methodName
+     * @param string          $methodName
      *
      * @return array
+     * @throws \ReflectionException
      */
-    public function getConditions(ReflectionClass $class, $methodName)
+    public function getConditions(ReflectionClass $class, string $methodName): array
     {
         $annotations   = [];
         $parentMethods = [];
-        if (preg_match('/\@inheritdoc/i', $class->getMethod($methodName)->getDocComment())) {
+        if (\preg_match('/\@inheritdoc/i', $class->getMethod($methodName)->getDocComment())) {
             $this->getParentClassesMethods($class, $methodName, $parentMethods);
             $this->getInterfacesMethods($class, $methodName, $parentMethods);
         }
 
         foreach ($parentMethods as $parentMethod) {
-            $annotations = array_merge($annotations, $this->annotationReader->getMethodAnnotations($parentMethod));
+            $annotations[] = $this->annotationReader->getMethodAnnotations($parentMethod);
         }
-        $contracts = $this->filterContractAnnotation($annotations);
 
-        return $contracts;
+        if (\count($annotations)) {
+            $annotations = \array_merge(...$annotations);
+        }
+
+        return $this->filterContractAnnotation($annotations);
     }
 
     /**
      * @param ReflectionClass $class
-     * @param string $methodName
-     * @param array $parentMethods
+     * @param string          $methodName
+     * @param array           $parentMethods
+     * @throws \ReflectionException
      */
-    private function getParentClassesMethods(ReflectionClass $class, $methodName, &$parentMethods)
+    private function getParentClassesMethods(ReflectionClass $class, string $methodName, array &$parentMethods): void
     {
         while (($class = $class->getParentClass()) && $class->hasMethod($methodName)) {
             $parentMethods[] = $class->getMethod($methodName);
@@ -53,13 +60,13 @@ class MethodConditionWithInheritDocFetcher extends AbstractFetcher
 
     /**
      * @param ReflectionClass $class
-     * @param string $methodName
-     * @param array $parentMethods
+     * @param string          $methodName
+     * @param array           $parentMethods
+     * @throws \ReflectionException
      */
-    private function getInterfacesMethods(ReflectionClass $class, $methodName, &$parentMethods)
+    private function getInterfacesMethods(ReflectionClass $class, $methodName, &$parentMethods): void
     {
-        $interfaces = $class->getInterfaces();
-        foreach ($interfaces as $interface) {
+        foreach ($class->getInterfaces() as $interface) {
             if ($interface->hasMethod($methodName)) {
                 $parentMethods[] = $interface->getMethod($methodName);
             }

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -38,6 +40,7 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
      * @param MethodInvocation $invocation
      *
      * @throws ContractViolation
+     * @throws \ReflectionException
      * @return mixed
      */
     public function postConditionContract(MethodInvocation $invocation)
@@ -61,8 +64,9 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
     /**
      * @param MethodInvocation $invocation
      * @return array
+     * @throws \ReflectionException
      */
-    private function fetchAllContracts(MethodInvocation $invocation)
+    private function fetchAllContracts(MethodInvocation $invocation): array
     {
         $allContracts = $this->fetchParentsContracts($invocation);
         foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
@@ -71,14 +75,15 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
             }
         }
 
-        return array_unique($allContracts);
+        return \array_unique($allContracts);
     }
 
     /**
      * @param MethodInvocation $invocation
      * @return array
+     * @throws \ReflectionException
      */
-    private function fetchParentsContracts(MethodInvocation $invocation)
+    private function fetchParentsContracts(MethodInvocation $invocation): array
     {
         return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),

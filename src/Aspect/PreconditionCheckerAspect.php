@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -39,7 +41,7 @@ class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
      *
      * @throws ContractViolation
      */
-    public function preConditionContract(MethodInvocation $invocation)
+    public function preConditionContract(MethodInvocation $invocation): void
     {
         $object = $invocation->getThis();
         $args   = $this->fetchMethodArguments($invocation);
@@ -53,7 +55,7 @@ class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
      * @param MethodInvocation $invocation
      * @return array
      */
-    private function fetchAllContracts(MethodInvocation $invocation)
+    private function fetchAllContracts(MethodInvocation $invocation): array
     {
         $allContracts = $this->fetchParentsContracts($invocation);
 
@@ -63,14 +65,14 @@ class PreconditionCheckerAspect extends AbstractContractAspect implements Aspect
             }
         }
 
-        return array_unique($allContracts);
+        return \array_unique($allContracts);
     }
 
     /**
      * @param MethodInvocation $invocation
      * @return array
      */
-    private function fetchParentsContracts(MethodInvocation $invocation)
+    private function fetchParentsContracts(MethodInvocation $invocation): array
     {
         return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),

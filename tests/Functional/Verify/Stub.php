@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -21,10 +23,10 @@ class Stub
      * Method with numeric parameter requirement
      *
      * @param float $variable
-     * @Contract\Verify("is_numeric($variable)")
+     * @Contract\Verify("\is_numeric($variable)")
      * @return float
      */
-    public function testNumeric($variable)
+    public function testNumeric(float $variable): float
     {
         return $variable;
     }
@@ -37,9 +39,8 @@ class Stub
      * @Contract\Verify("$variable > $this->privateValue")
      * @Pointcut("")
      */
-    public function testAccessToPrivateField($variable)
+    public function testAccessToPrivateField($variable): void
     {
-        return;
     }
 
     /**
@@ -47,9 +48,9 @@ class Stub
      *
      * @param int $value
      * @return bool
-     * @Contract\Verify("Assert\Assertion::integer($value)")
+     * @Contract\Verify("Assert\Assertion::greaterThan($value, 5)")
      */
-    public function add($value)
+    public function add(int $value): bool
     {
         return true;
     }
@@ -59,11 +60,11 @@ class Stub
      *
      * @param int $value
      * @return bool
-     * @Contract\Verify("is_numeric($value)")
+     * @Contract\Verify("$value < 10")
      * @Contract\Verify("$value > 5")
      */
-    public function sub($value)
+    public function sub(int $value): bool
     {
         return true;
     }
-} 
+}
