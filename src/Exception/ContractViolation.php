@@ -28,10 +28,12 @@ class ContractViolation extends \LogicException
      */
     public function __construct(MethodInvocation $invocation, $contract, Exception $previous = null)
     {
-        $obj        = $invocation->getThis();
-        $objName    = is_object($obj) ? get_class($obj) : $obj;
-        $method     = $invocation->getMethod();
+        $obj       = $invocation->getThis();
+        $objName   = is_object($obj) ? get_class($obj) : $obj;
+        $method    = $invocation->getMethod();
+//        $arguments = implode(', ', $invocation->getArguments());
 
+//        $message = "Contract {$contract} violated with {$arguments} for {$objName}->{$method->name}";
         $message = "Contract {$contract} violated for {$objName}->{$method->name}";
         parent::__construct($message, 0, $previous);
 

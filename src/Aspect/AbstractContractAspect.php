@@ -67,6 +67,7 @@ abstract class AbstractContractAspect
      * @param array $args List of arguments for the method
      *
      * @throws DomainException
+     * @throws ContractViolation
      */
     protected function ensureContracts(MethodInvocation $invocation, array $contracts, $instance, $scope, array $args)
     {
@@ -86,6 +87,10 @@ abstract class AbstractContractAspect
             $contractExpression = $contract->value;
             try {
                 $invocationResult = $boundInvoker->__invoke($args, $contractExpression);
+
+//                if ($invocationResult === false) {
+//                    throw new ContractViolation($invocation, $contractExpression);
+//                }
 
                 // we accept as a result only true or null
                 // null may be a result of assertions from beberlei/assert which passed
