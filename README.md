@@ -284,7 +284,7 @@ To solve this issue try adding your `vendor` folder into the `excludePaths` conf
 ContractApplication::getInstance()->init(array(
     'debug'    => true,
     'appDir'   => __DIR__,,
-    'exludePaths' => [
+    'excludePaths' => [
         __DIR__ . '/vendor'
     ],
     'cacheDir' => __DIR__.'/cache/',
