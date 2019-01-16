@@ -52,9 +52,17 @@ class MethodConditionFetcher extends AbstractFetcher
      */
     private function getParentClassesMethods(ReflectionClass $class, string $methodName, array &$parentMethods): void
     {
-        while (($class = $class->getParentClass()) && $class->hasMethod($methodName)) {
-            $parentMethods[] = $class->getMethod($methodName);
+        $parent = $class->getParentClass();
+
+        if ($parent === false) {
+            return;
         }
+
+        if ($parent->hasMethod($methodName)) {
+            $parentMethods[] = $parent->getMethod($methodName);
+        }
+
+        $this->getParentClassesMethods($parent, $methodName, $parentMethods);
     }
 
     /**

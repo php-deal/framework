@@ -1,3 +1,11 @@
-/vendor/
+# Composer
+vendor/
 composer.lock
+
+# Tests
 /tests/cache/
+
+# Code quality
+/phpunit.xml
+/phpcs.xml
+/phpstan.neon

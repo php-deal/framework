@@ -1,0 +1,7 @@
+parameters:
+    excludes_analyse:
+        - %rootDir%/../../../tests/cache
+    level: max
+    paths:
+        - src/
+        - tests/

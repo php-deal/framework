@@ -80,7 +80,8 @@ abstract class AbstractContractAspect
         static $invoker = null;
         if (!$invoker) {
             $invoker = function () {
-                \extract(\func_get_arg(0), EXTR_OVERWRITE);
+                $args = \func_get_arg(0);
+                \extract($args, EXTR_OVERWRITE);
 
                 return eval('return ' . \func_get_arg(1) . '; ?>');
             };

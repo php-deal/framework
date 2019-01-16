@@ -3,10 +3,11 @@
     "description": "Design by Contract framework for PHP",
     "require": {
         "php": "^7.2",
-        "goaop/framework": "~2.0",
-        "beberlei/assert": "^2.4"
+        "beberlei/assert": "^2.4",
+        "goaop/framework": "^2.3"
     },
     "require-dev": {
+        "phpstan/phpstan": "^0.11.0",
         "phpunit/phpunit": "^7.5",
         "roave/security-advisories": "dev-master",
         "slevomat/coding-standard": "^4.8",
@@ -14,6 +15,7 @@
         "symfony/console": "~2.7|~3.0"
     },
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Alexander Lisachenko",
@@ -38,11 +40,13 @@
         }
     },
     "scripts": {
+        "phpstan": "phpstan analyze",
         "phpcs": "phpcs src tests -sp --colors",
         "phpunit": "phpunit --verbose --colors=always",
         "test": [
-            "@phpunit",
-            "@phpcs"
+            "@phpstan",
+            "@phpcs",
+            "@phpunit"
         ]
     },
     "config": {

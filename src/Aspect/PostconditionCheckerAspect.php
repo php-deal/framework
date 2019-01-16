@@ -15,10 +15,12 @@ namespace PhpDeal\Aspect;
 use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
+use Go\Aop\Support\AnnotatedReflectionMethod;
 use PhpDeal\Annotation\Ensure;
 use PhpDeal\Contract\Fetcher\Parent\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
 use Go\Lang\Annotation\Around;
+use ReflectionMethod;
 
 class PostconditionCheckerAspect extends AbstractContractAspect implements Aspect
 {
@@ -48,7 +50,7 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
         $object = $invocation->getThis();
         $args   = $this->fetchMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
+        if (\is_object($object) && $class->isCloneable()) {
             $args['__old'] = clone $object;
         }
 
@@ -69,7 +71,10 @@ class PostconditionCheckerAspect extends AbstractContractAspect implements Aspec
     private function fetchAllContracts(MethodInvocation $invocation): array
     {
         $allContracts = $this->fetchParentsContracts($invocation);
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+        /** @var ReflectionMethod&AnnotatedReflectionMethod $reflectionMethod */
+        $reflectionMethod = $invocation->getMethod();
+
+        foreach ($reflectionMethod->getAnnotations() as $annotation) {
             if ($annotation instanceof Ensure) {
                 $allContracts[] = $annotation;
             }

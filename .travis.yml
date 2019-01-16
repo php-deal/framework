@@ -9,6 +9,7 @@ before_script:
 script:
   - vendor/bin/phpunit --verbose --coverage-text --coverage-clover=clover.xml --colors
   - vendor/bin/phpcs src/ tests/
+  - vendor/bin/phpstan analyze
 
 after_script:
   - sh .travis.coverage.sh
