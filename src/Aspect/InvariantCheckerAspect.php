@@ -49,7 +49,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
         $object = $invocation->getThis();
         $args   = $this->fetchMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
+        if (\is_object($object) && $class->isCloneable()) {
             $args['__old'] = clone $object;
         }
 

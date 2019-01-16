@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace PhpDeal\Exception;
 
-use Exception;
 use Go\Aop\Intercept\MethodInvocation;
+use Throwable;
 
 /**
  * Specific contract violation exception to point to the file and line of invocation
@@ -26,9 +26,9 @@ class ContractViolation extends \LogicException
      *
      * @param MethodInvocation $invocation Current method invocation
      * @param string $contract Violated contract code
-     * @param Exception $previous
+     * @param Throwable $previous
      */
-    public function __construct(MethodInvocation $invocation, $contract, Exception $previous = null)
+    public function __construct(MethodInvocation $invocation, $contract, Throwable $previous = null)
     {
         $obj        = $invocation->getThis();
         $objName    = \is_object($obj) ? \get_class($obj) : $obj;
