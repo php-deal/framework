@@ -28,6 +28,17 @@ interface AccountContractInterface
     public function deposit($amount);
 
     /**
+     * Withdraw amount of money from account.
+     *
+     * We don't allow withdrawal of more than 50
+     * @Contract\Verify("$amount <= $this->balance")
+     * @Contract\Verify("$amount <= 50")
+     * @Contract\Ensure("$this->balance == $__old->balance-$amount")
+     * @param float $amount
+     */
+    public function withdraw($amount);
+
+    /**
      * Returns current balance
      *
      * @Contract\Ensure("$__result == $this->balance")

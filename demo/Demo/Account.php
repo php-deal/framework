@@ -14,7 +14,7 @@ use PhpDeal\Annotation as Contract;
 
 /**
  * Simple trade account class
- * @Contract\Invariant("$this->balance > 0")
+ * @Contract\Invariant("$this->balance >= 0")
  */
 class Account implements AccountContractInterface
 {
@@ -40,9 +40,19 @@ class Account implements AccountContractInterface
     }
 
     /**
+     * @Contract\Inherit()
+     * @param float $amount
+     */
+    public function withdraw($amount)
+    {
+        $this->balance -= $amount;
+    }
+
+    /**
      * Returns current balance
      *
      * @Contract\Ensure("$__result == $this->balance")
+     *
      * @return float
      */
     public function getBalance()

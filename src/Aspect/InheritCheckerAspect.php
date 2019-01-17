@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace PhpDeal\Aspect;
 
@@ -11,14 +10,14 @@ use PhpDeal\Annotation\Ensure;
 use PhpDeal\Annotation\Invariant;
 use PhpDeal\Annotation\Verify;
 use PhpDeal\Contract\Fetcher\Parent\InvariantFetcher;
-use PhpDeal\Contract\Fetcher\Parent\MethodConditionWithInheritDocFetcher;
+use PhpDeal\Contract\Fetcher\Parent\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
 use ReflectionClass;
 
 class InheritCheckerAspect extends AbstractContractAspect implements Aspect
 {
     /**
-     * @var MethodConditionWithInheritDocFetcher
+     * @var MethodConditionFetcher
      */
     private $methodConditionFetcher;
 
@@ -28,7 +27,7 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->methodConditionFetcher = new MethodConditionWithInheritDocFetcher([Ensure::class, Verify::class, Invariant::class], $reader);
+        $this->methodConditionFetcher = new MethodConditionFetcher([Ensure::class, Verify::class, Invariant::class], $reader);
         $this->invariantFetcher = new InvariantFetcher([Invariant::class], $reader);
     }
 
