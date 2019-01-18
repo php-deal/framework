@@ -135,17 +135,30 @@ class Account
 ```
 Invariants contain assert expressions, and so when they fail, they throw a ContractViolation exception.
 
-NOTE! The code in the invariant may not call any public non-static members of the class, either directly or
+__NOTE__: The code in the invariant may not call any public non-static members of the class, either directly or
 indirectly. Doing so will result in a stack overflow, as the invariant will wind up being called in an
 infinitely recursive manner.
 
 Contract propagation
 ----------
 
-All contracts are propagated from parent classes and interfaces.
+There a some differences in inheritance of the contracts:
 
-For preconditions (Verify contracts) subclasses do not inherit contracts of parents' methods if they don't have the @inheritdoc annotation. Example:
-
+1. Ensure
+  - if provided `Ensure` will automatically inherit all contracts from parent class or interface
+2. Verify
+  - if provided `Verify` will _not_ inherit contracts from parent class or interface
+  - to inherit contracts you will ne to provide `@inheritdoc` or the `Inherit` contract
+3. Invariant
+  - if provided `Invariant` will inherit all contracts from parent class or interface
+4. Inherit
+  - if provided `Inherit` will inherit all contracts from the given leven (class, method) without the
+  need to provide a contract on your current class or method
+  
+__Notes__: 
+- The parsing of a contract only happens __IF__ you provide any given annotation from this package.
+Without it your contracts won't work!
+- The annotation __must not__ have curly braces (`{}`) otherwise the annotation reader can't find them.
 
 ```php
 
@@ -175,7 +188,7 @@ class FooParent
     
 ```
 
-Foo::bar accepts '2' literal as a parameter and does not accept '1'.
+`Foo::bar` accepts `2` literal as a parameter and does not accept `1`.
 
 With @inheritdoc:
 
@@ -208,12 +221,10 @@ class FooParent
     
 ```
 
-Foo::bar does not accept '1' and '2' literals as a parameter.
+`Foo::bar` does not accept `1` and `2` literals as a parameter.
 
 
-
-
-For postconditions (Ensure and Invariants contracts) subclasses inherit contracts and they don't need @inheritdoc. Example:
+For postconditions (Ensure and Invariants contracts) subclasses inherit contracts and they don't need `@inheritdoc`. Example:
 
 ```php
     
@@ -246,7 +257,37 @@ class FooParent
     
 ```
 
-Foo::setBar does not accept '1' and '2' literals as a parameter.
+`Foo::setBar` does not accept `1` and `2` literals as a parameter.
+
+If you don't want to provide a contract on your curent method/class you can use the `Inherit` annotation:
+
+```php
+class Foo extends FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Inherit
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+    
+class FooParent
+{
+    /**
+     * @param int $amount
+     * @Contract\Verify("$amount != 2")
+     */
+    public function bar($amount)
+    {
+        ...
+    }
+}
+```
+
+`Foo:bar()` does accept eveything, except: `2`
 
 Integration with assertion library
 ----------

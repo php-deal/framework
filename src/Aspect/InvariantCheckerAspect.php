@@ -29,7 +29,7 @@ class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->invariantFetcher = new InvariantFetcher(Invariant::class, $reader);
+        $this->invariantFetcher = new InvariantFetcher([Invariant::class], $reader);
     }
 
     /**

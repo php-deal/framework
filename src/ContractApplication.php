@@ -11,6 +11,7 @@ namespace PhpDeal;
 
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
+use PhpDeal\Aspect\InheritCheckerAspect;
 use PhpDeal\Aspect\InvariantCheckerAspect;
 use PhpDeal\Aspect\PostconditionCheckerAspect;
 use PhpDeal\Aspect\PreconditionCheckerAspect;
@@ -34,5 +35,6 @@ class ContractApplication extends AspectKernel
         $container->registerAspect(new InvariantCheckerAspect($reader));
         $container->registerAspect(new PostconditionCheckerAspect($reader));
         $container->registerAspect(new PreconditionCheckerAspect($reader));
+        $container->registerAspect(new InheritCheckerAspect($reader));
     }
 }

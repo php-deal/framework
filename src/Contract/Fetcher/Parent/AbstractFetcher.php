@@ -15,9 +15,9 @@ use Doctrine\Common\Annotations\Reader;
 abstract class AbstractFetcher
 {
     /**
-     * @var string
+     * @var string[]
      */
-    protected $expectedAnnotationType;
+    protected $expectedAnnotationTypes;
 
     /**
      * @var Reader
@@ -25,13 +25,13 @@ abstract class AbstractFetcher
     protected $annotationReader;
 
     /**
-     * @param string $expectedAnnotationType
-     * @param Reader $reader
+     * @param string[] $expectedAnnotationTypes
+     * @param Reader   $reader
      */
-    public function __construct($expectedAnnotationType, Reader $reader)
+    public function __construct($expectedAnnotationTypes, Reader $reader)
     {
-        $this->expectedAnnotationType = $expectedAnnotationType;
-        $this->annotationReader       = $reader;
+        $this->expectedAnnotationTypes = $expectedAnnotationTypes;
+        $this->annotationReader        = $reader;
     }
 
     /**
@@ -45,7 +45,9 @@ abstract class AbstractFetcher
         $contractAnnotations = [];
 
         foreach ($annotations as $annotation) {
-            if ($annotation instanceof $this->expectedAnnotationType) {
+            $annotationClass = \get_class($annotation);
+
+            if (\in_array($annotationClass, $this->expectedAnnotationTypes, true)) {
                 $contractAnnotations[] = $annotation;
             }
         }

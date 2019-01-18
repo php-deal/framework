@@ -13,5 +13,11 @@ include __DIR__.'/../vendor/autoload.php';
 include_once __DIR__.'/aspect_bootstrap.php';
 
 $account = new Demo\Account();
+
+echo 'Deposit: 100' . PHP_EOL;
 $account->deposit(100);
-echo $account->getBalance();
+echo 'Current balance: ' . $account->getBalance();
+echo PHP_EOL;
+echo 'Withdraw: 100' . PHP_EOL;
+$account->withdraw(50);
+echo 'Current balance: ' . $account->getBalance();
