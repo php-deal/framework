@@ -148,16 +148,16 @@ There a some differences in inheritance of the contracts:
   - if provided `Ensure` will automatically inherit all contracts from parent class or interface
 2. Verify
   - if provided `Verify` will _not_ inherit contracts from parent class or interface
-  - to inherit contracts you will ne to provide `@inheritdoc` or the `Inherit` contract
+  - to inherit contracts you will need to provide `@inheritdoc` or the `Inherit` contract
 3. Invariant
   - if provided `Invariant` will inherit all contracts from parent class or interface
 4. Inherit
-  - if provided `Inherit` will inherit all contracts from the given leven (class, method) without the
+  - if provided `Inherit` will inherit all contracts from the given level (class, method) without the
   need to provide a contract on your current class or method
   
 __Notes__: 
 - The parsing of a contract only happens __IF__ you provide any given annotation from this package.
-Without it your contracts won't work!
+Without it, your contracts won't work!
 - The annotation __must not__ have curly braces (`{}`) otherwise the annotation reader can't find them.
 
 ```php
