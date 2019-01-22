@@ -2,13 +2,13 @@
     "name": "php-deal/framework",
     "description": "Design by Contract framework for PHP",
     "require": {
-        "php": ">=5.6.0",
-        "goaop/framework": "~2.0",
-        "beberlei/assert": "^2.4"
+        "php": "~7.0",
+        "goaop/framework": "~2.0"
     },
     "require-dev": {
         "symfony/console": "~2.7|~3.0",
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^5.7",
+        "beberlei/assert": "~3.0"
     },
     "license": "MIT",
     "authors": [
@@ -27,5 +27,13 @@
     "autoload-dev": {
         "psr-0": {"Demo\\": "demo/"},
         "psr-4": {"PhpDeal\\": "tests/"}
+    },
+    "suggest": {
+      "beberlei/assert": "Thin assertion library for input validation in business models. Used for tests."
+    },
+    "support": {
+      "issues": "https://github.com/php-deal/framework/issues",
+      "source": "https://github.com/php-deal/framework",
+      "docs": "https://github.com/php-deal/framework/blob/master/README.md"
     }
 }
