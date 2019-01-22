@@ -22,9 +22,8 @@ class ContractTest extends TestCase
         unset($this->stubWithoutInherit, $this->stubWithInherit);
     }
 
-    public function testWithoutInheritIsValid()
+    public function testWithoutInheritIsValid(): void
     {
-        $this->stubWithoutInherit->add("test");
         $this->stubWithoutInherit->add(0);
         $this->assertEquals(10, $this->stubWithoutInherit->getAmount());
     }
@@ -33,12 +32,12 @@ class ContractTest extends TestCase
      * @expectedException \PhpDeal\Exception\ContractViolation
      * @return void
      */
-    public function testWithInheritInvalid()
+    public function testWithInheritInvalid(): void
     {
         $this->stubWithInherit->add(0);
     }
 
-    public function testWithInheritValid()
+    public function testWithInheritValid(): void
     {
         $this->stubWithInherit->add(10);
         $this->assertEquals(10, $this->stubWithInherit->getAmount());
