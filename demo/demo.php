@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
@@ -18,6 +20,6 @@ echo 'Deposit: 100' . PHP_EOL;
 $account->deposit(100);
 echo 'Current balance: ' . $account->getBalance();
 echo PHP_EOL;
-echo 'Withdraw: 100' . PHP_EOL;
+echo 'Withdraw: 50' . PHP_EOL;
 $account->withdraw(50);
 echo 'Current balance: ' . $account->getBalance();

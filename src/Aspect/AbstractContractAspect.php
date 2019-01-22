@@ -96,9 +96,9 @@ abstract class AbstractContractAspect
             try {
                 $invocationResult = $boundInvoker->__invoke($args, $contractExpression);
 
-//                if ($invocationResult === false) {
-//                    throw new ContractViolation($invocation, $contractExpression);
-//                }
+                if ($invocationResult === false) {
+                    throw new ContractViolation($invocation, $contractExpression);
+                }
 
                 // we accept as a result only true or null
                 // null may be a result of assertions from beberlei/assert which passed

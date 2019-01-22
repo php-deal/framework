@@ -33,8 +33,9 @@ class ContractViolation extends \LogicException
         $obj        = $invocation->getThis();
         $objName    = \is_object($obj) ? \get_class($obj) : $obj;
         $method     = $invocation->getMethod();
+        $args       = implode(', ', $invocation->getArguments());
 
-        $message = "Contract {$contract} violated for {$objName}->{$method->name}";
+        $message = "Contract {$contract} violated with argument set {{$args}} for {$objName}->{$method->name}";
         parent::__construct($message, 0, $previous);
 
         $this->file = $method->getFileName();

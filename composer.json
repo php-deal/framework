@@ -23,6 +23,10 @@
         {
             "name": "Piotr Dawidiuk",
             "email": "piotr.dawidiuk@gmail.com"
+        },
+        {
+            "name": "Andreas Frömer",
+            "email": "blubb0r05+github@gmail.com"
         }
     ],
     "autoload": {
