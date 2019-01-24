@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -18,6 +20,6 @@ echo 'Deposit: 100' . PHP_EOL;
 $account->deposit(100);
 echo 'Current balance: ' . $account->getBalance();
 echo PHP_EOL;
-echo 'Withdraw: 100' . PHP_EOL;
+echo 'Withdraw: 50' . PHP_EOL;
 $account->withdraw(50);
 echo 'Current balance: ' . $account->getBalance();

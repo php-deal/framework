@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -10,7 +12,10 @@
 
 namespace PhpDeal\Functional\Ensure;
 
-class ContractTest extends \PHPUnit_Framework_TestCase
+use PhpDeal\Exception\ContractViolation;
+use PHPUnit\Framework\TestCase;
+
+class ContractTest extends TestCase
 {
     /**
      * @var Stub
@@ -29,29 +34,27 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function testEnsureValid()
+    public function testEnsureValid(): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->increment(50);
     }
 
-    /**
-     * @expectedException \PhpDeal\Exception\ContractViolation
-     */
-    public function testEnsureManyContractsInvalid()
+    public function testEnsureManyContractsInvalid(): void
     {
+        $this->expectException(ContractViolation::class);
         $this->stub->increment(-50);
     }
 
-    /**
-     * @expectedException \PhpDeal\Exception\ContractViolation
-     */
-    public function testEnsureInvalid()
+    public function testEnsureInvalid(): void
     {
+        $this->expectException(ContractViolation::class);
         $this->stub->badIncrement(40);
     }
 
-    public function testEnsureCanHandleResult()
+    public function testEnsureCanHandleResult(): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->returnPrivateValue();
     }
 }

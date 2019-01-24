@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -21,10 +23,10 @@ class Stub
      * Method that changes internal state and ensures a contract for this
      * @param float $amount
      *
-     * @Contract\Ensure("$this->privateValue == $__old->privateValue + $amount")
+     * @Contract\Ensure("$this->privateValue === $__old->privateValue + $amount")
      * @Contract\Ensure("$this->privateValue > 0")
      */
-    public function increment($amount)
+    public function increment(float $amount): void
     {
         $this->privateValue += $amount;
     }
@@ -33,9 +35,9 @@ class Stub
      * BAD Method that changes internal state and ensures a contract for this
      * @param float $amount
      *
-     * @Contract\Ensure("$this->privateValue == $__old->privateValue + $amount")
+     * @Contract\Ensure("$this->privateValue === $__old->privateValue + $amount")
      */
-    public function badIncrement($amount)
+    public function badIncrement(float $amount): void
     {
         $this->privateValue += ($amount - 0.1); // Dirty hacker wants to earn money!
     }
@@ -43,9 +45,9 @@ class Stub
     /**
      * Let's check that this getter is not cheating
      *
-     * @Contract\Ensure("$__result == $this->privateValue")
+     * @Contract\Ensure("$__result === $this->privateValue")
      */
-    public function returnPrivateValue()
+    public function returnPrivateValue(): int
     {
         return $this->privateValue;
     }
@@ -53,11 +55,10 @@ class Stub
     /**
      * Let's check that aspect doesn't pay an attention to unknown annotations
      *
-     * @Contract\Ensure("$__result == $this->privateValue")
+     * @Contract\Ensure("$__result === $this->privateValue")
      * @Pointcut("")
      */
-    public function unknown()
+    public function unknown(): void
     {
-
     }
 }

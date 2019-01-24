@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -10,7 +12,10 @@
 
 namespace PhpDeal\Functional\Invariant;
 
-class ContractTest extends \PHPUnit_Framework_TestCase
+use PhpDeal\Exception\ContractViolation;
+use PHPUnit\Framework\TestCase;
+
+class ContractTest extends TestCase
 {
     /**
      * @var Stub
@@ -29,24 +34,21 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function testInvariantValid()
+    public function testInvariantValid(): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->accelerate(10, 30); // let's have a speed 300m/s
     }
 
-    /**
-     * @expectedException \PhpDeal\Exception\ContractViolation
-     */
-    public function testInvariantViolated()
+    public function testInvariantViolated(): void
     {
+        $this->expectException(ContractViolation::class);
         $this->stub->accelerate(10, 3e7); // let's have a speed 3*1e8 m/s, faster than light!
     }
 
-    /**
-     * @expectedException \PhpDeal\Exception\ContractViolation
-     */
-    public function testInvariantViolatedAfterSeveralMethods()
+    public function testInvariantViolatedAfterSeveralMethods(): void
     {
+        $this->expectException(ContractViolation::class);
         $this->stub->accelerate(10, 30); // let's have a speed 300m/s
         $this->stub->decelerate(20, 20); // Negative speed?
     }

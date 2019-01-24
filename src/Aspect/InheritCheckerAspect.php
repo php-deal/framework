@@ -5,6 +5,7 @@ namespace PhpDeal\Aspect;
 use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
+use Go\Aop\Support\AnnotatedReflectionMethod;
 use Go\Lang\Annotation\Around;
 use PhpDeal\Annotation\Ensure;
 use PhpDeal\Annotation\Invariant;
@@ -13,6 +14,7 @@ use PhpDeal\Contract\Fetcher\Parent\InvariantFetcher;
 use PhpDeal\Contract\Fetcher\Parent\MethodConditionFetcher;
 use PhpDeal\Exception\ContractViolation;
 use ReflectionClass;
+use ReflectionMethod;
 
 class InheritCheckerAspect extends AbstractContractAspect implements Aspect
 {
@@ -27,7 +29,11 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
     public function __construct(Reader $reader)
     {
         parent::__construct($reader);
-        $this->methodConditionFetcher = new MethodConditionFetcher([Ensure::class, Verify::class, Invariant::class], $reader);
+        $this->methodConditionFetcher = new MethodConditionFetcher([
+            Ensure::class,
+            Verify::class,
+            Invariant::class
+        ], $reader);
         $this->invariantFetcher = new InvariantFetcher([Invariant::class], $reader);
     }
 
@@ -38,6 +44,7 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
      * @param MethodInvocation $invocation
      *
      * @throws ContractViolation
+     * @throws \ReflectionException
      * @return mixed
      */
     public function inheritMethodContracts(MethodInvocation $invocation)
@@ -45,7 +52,7 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
         $object = $invocation->getThis();
         $args   = $this->fetchMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
+        if (\is_object($object) && $class->isCloneable()) {
             $args['__old'] = clone $object;
         }
 
@@ -62,13 +69,14 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
      * @Around("@within(PhpDeal\Annotation\Inherit) && execution(public **->*(*))")
      * @param MethodInvocation $invocation
      * @return mixed
+     * @throws \ReflectionException
      */
     public function inheritClassContracts(MethodInvocation $invocation)
     {
         $object = $invocation->getThis();
         $args   = $this->fetchMethodArguments($invocation);
         $class  = $invocation->getMethod()->getDeclaringClass();
-        if ($class->isCloneable()) {
+        if (\is_object($object) && $class->isCloneable()) {
             $args['__old'] = clone $object;
         }
 
@@ -84,12 +92,15 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
     /**
      * @param MethodInvocation $invocation
      * @return array
+     * @throws \ReflectionException
      */
-    private function fetchMethodContracts(MethodInvocation $invocation)
+    private function fetchMethodContracts(MethodInvocation $invocation): array
     {
         $allContracts = $this->fetchParentsMethodContracts($invocation);
+        /** @var ReflectionMethod&AnnotatedReflectionMethod $reflectionMethod */
+        $reflectionMethod = $invocation->getMethod();
 
-        foreach ($invocation->getMethod()->getAnnotations() as $annotation) {
+        foreach ($reflectionMethod->getAnnotations() as $annotation) {
             $annotationClass = \get_class($annotation);
 
             if (\in_array($annotationClass, [Ensure::class, Verify::class, Invariant::class], true)) {
@@ -97,14 +108,15 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
             }
         }
 
-        return array_unique($allContracts);
+        return \array_unique($allContracts);
     }
 
     /**
      * @param MethodInvocation $invocation
      * @return array
+     * @throws \ReflectionException
      */
-    private function fetchParentsMethodContracts(MethodInvocation $invocation)
+    private function fetchParentsMethodContracts(MethodInvocation $invocation): array
     {
         return $this->methodConditionFetcher->getConditions(
             $invocation->getMethod()->getDeclaringClass(),
@@ -116,7 +128,7 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
      * @param ReflectionClass $class
      * @return array
      */
-    private function fetchClassContracts(ReflectionClass $class)
+    private function fetchClassContracts(ReflectionClass $class): array
     {
         $allContracts = $this->invariantFetcher->getConditions($class);
         foreach ($this->reader->getClassAnnotations($class) as $annotation) {
@@ -125,6 +137,6 @@ class InheritCheckerAspect extends AbstractContractAspect implements Aspect
             }
         }
 
-        return array_unique($allContracts);
+        return \array_unique($allContracts);
     }
 }

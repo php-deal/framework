@@ -1,15 +1,16 @@
 language: php
 
 php:
-  - 7.0
-  - 7.1
   - 7.2
+  - 7.3
 
 before_script:
   - composer install
 
 script:
   - vendor/bin/phpunit --verbose --coverage-text --coverage-clover=clover.xml --colors
+  - vendor/bin/phpcs src/ tests/
+  - vendor/bin/phpstan analyze
 
 after_script:
   - sh .travis.coverage.sh

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2014, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -10,10 +12,13 @@
 
 namespace PhpDeal\Functional\Verify\ClassPropagation;
 
+use PhpDeal\Exception\ContractViolation;
+use PHPUnit\Framework\TestCase;
+
 /**
  * @group propagation
  */
-class ContractTest extends \PHPUnit_Framework_TestCase
+class ContractTest extends TestCase
 {
     /**
      * @var Stub
@@ -32,7 +37,7 @@ class ContractTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    public function providerVerifyInvalid()
+    public function providerVerifyInvalid(): array
     {
         return [
             [
@@ -45,14 +50,14 @@ class ContractTest extends \PHPUnit_Framework_TestCase
     /**
      * @param int $parameter
      * @dataProvider providerVerifyInvalid
-     * @expectedException \PhpDeal\Exception\ContractViolation
      */
-    public function testVerifyInvalid($parameter)
+    public function testVerifyInvalid(int $parameter): void
     {
+        $this->expectException(ContractViolation::class);
         $this->stub->add($parameter);
     }
 
-    public function providerVerifyValid()
+    public function providerVerifyValid(): array
     {
         return [
             [
@@ -66,8 +71,9 @@ class ContractTest extends \PHPUnit_Framework_TestCase
      * @param int $parameter
      * @dataProvider providerVerifyValid
      */
-    public function testVerifyValid($parameter)
+    public function testVerifyValid(int $parameter): void
     {
+        $this->expectNotToPerformAssertions();
         $this->stub->add($parameter);
     }
 }
