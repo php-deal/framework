@@ -1,0 +1,2 @@
+0
+a:1:{i:0;O:28:"PhpDeal\Annotation\Invariant":1:{s:5:"value";s:19:"$this->balance >= 0";}}

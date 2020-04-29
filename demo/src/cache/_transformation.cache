@@ -1,0 +1,12 @@
+<?php return array (
+  AOP_ROOT_DIR . '/Demo/Account.php' => 
+  array (
+    'filemtime' => 1588197161,
+    'cacheUri' => AOP_CACHE_DIR . '/Demo/Account.php',
+  ),
+  AOP_ROOT_DIR . '/Demo/AccountContractInterface.php' => 
+  array (
+    'filemtime' => 1588197161,
+    'cacheUri' => NULL,
+  ),
+);

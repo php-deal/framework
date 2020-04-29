@@ -1,0 +1,11 @@
+{
+    "name": "phpdeal/framework",
+    "require": {
+        "php-deal/framework": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Demo\\":"src/Demo"
+        }
+    }
+}

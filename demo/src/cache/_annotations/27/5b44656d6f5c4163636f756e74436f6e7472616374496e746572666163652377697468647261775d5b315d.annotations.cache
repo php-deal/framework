@@ -1,0 +1,2 @@
+0
+a:3:{i:0;O:25:"PhpDeal\Annotation\Verify":1:{s:5:"value";s:25:"$amount <= $this->balance";}i:1;O:25:"PhpDeal\Annotation\Verify":1:{s:5:"value";s:13:"$amount <= 50";}i:2;O:25:"PhpDeal\Annotation\Ensure":1:{s:5:"value";s:41:"$this->balance == $__old->balance-$amount";}}
