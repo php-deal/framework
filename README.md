@@ -43,8 +43,8 @@ $ composer require php-deal/framework
 Setup
 -----
 
-Put the following code at the begining of your 
-application entry point (or require it from an external file). 
+Put the following code at the beginning of your 
+application entry point or require it from an external file. 
 
 ```php
 
