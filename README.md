@@ -40,10 +40,50 @@ the framework with its dependencies by running the command:
 $ composer require php-deal/framework
 ```
 
-IDE Integration
----------------
-To improve your productivity with PhpStorm, you should definitely install a [Go! AOP Framework](https://plugins.jetbrains.com/plugin/7785) plugin (>=1.0.1) to have a PHP syntax highlighting for defining contracts and navigation to AOP advices.
-<img src="https://cloud.githubusercontent.com/assets/640114/14225436/fc3e63a8-f8d3-11e5-9131-5c2ecc84ef60.png" alt="PhpStorm example" width="500px" />
+Setup
+-----
+
+Put the following code at the beginning of your 
+application entry point or require it from an external file. 
+
+```php
+
+$instance = ContractApplication::getInstance();
+$instance->init(array(
+    'debug'    => true,
+    'appDir'   => __DIR__,
+    'excludePaths' => [
+        __DIR__ . '/vendor'
+    ],
+    'includePaths' => [
+
+    ],
+    'cacheDir' => __DIR__.'/cache/',
+));
+```
+
+Symfony setup
+-------------
+
+Put the following code in app_dev.php and adapt it to match
+your folder structure. The appDir must point to the folder containing
+the src files, not the document root folder ! 
+
+```php
+
+$instance = ContractApplication::getInstance();
+$instance->init(array(
+    'debug'    => true,
+    'appDir'   => __DIR__ . '/../src',
+    'excludePaths' => [
+
+    ],
+    'includePaths' => [
+
+    ],
+    'cacheDir' => __DIR__.'/var/cache/',
+));
+```
 
 
 Pre and Post Contracts
@@ -308,6 +348,12 @@ To enhance capabilities of contracts, it's possible to use [assertion library](h
 ```
 
 [More assertions](https://github.com/beberlei/assert#list-of-assertions)
+
+IDE Integration
+---------------
+To improve your productivity with PhpStorm, you should definitely install a [Go! AOP Framework](https://plugins.jetbrains.com/plugin/7785) plugin (>=1.0.1) to have a PHP syntax highlighting for defining contracts and navigation to AOP advices.
+<img src="https://cloud.githubusercontent.com/assets/640114/14225436/fc3e63a8-f8d3-11e5-9131-5c2ecc84ef60.png" alt="PhpStorm example" width="500px" />
+
 
 Common issues
 -----------
