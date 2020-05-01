@@ -4,7 +4,7 @@ composer.lock
 
 # Cache
 /tests/cache/
-/demo/src/cache/
+/demo/cache/
 
 # Code quality
 /phpunit.xml
