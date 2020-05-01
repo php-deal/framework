@@ -24,7 +24,7 @@ echo 'Withdraw: 50' . PHP_EOL;
 $account->withdraw(50);
 echo 'Current balance: ' . $account->getBalance(), PHP_EOL;
 
-echo "current contract allows withdrawing amount less than 50", PHP_EOL;
+echo 'current contract allows withdrawing amount less than 50' . PHP_EOL;
 
-echo "trying withdrawing 70 should fail", PHP_EOL;
+echo 'trying withdrawing 70 should fail' . PHP_EOL;
 $account->withdraw(70);
