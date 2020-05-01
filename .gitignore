@@ -4,9 +4,12 @@ composer.lock
 
 # Cache
 /tests/cache/
-/demo/cache/
+/demo/src/cache/
 
 # Code quality
 /phpunit.xml
 /phpcs.xml
 /phpstan.neon
+
+
+
