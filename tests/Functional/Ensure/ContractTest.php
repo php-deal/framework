@@ -23,13 +23,13 @@ class ContractTest extends TestCase
      */
     private $stub;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->stub = new Stub();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         unset($this->stub);
         parent::tearDown();

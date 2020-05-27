@@ -11,13 +11,13 @@ class ContractTest extends TestCase
     /** @var StubWithInherit */
     private $stubWithInherit;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->stubWithoutInherit = new StubWithoutInherit();
         $this->stubWithInherit = new StubWithInherit();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         unset($this->stubWithoutInherit, $this->stubWithInherit);
     }

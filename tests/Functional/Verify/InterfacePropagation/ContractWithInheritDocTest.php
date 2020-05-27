@@ -27,13 +27,13 @@ class ContractWithInheritDocTest extends TestCase
      */
     private $stub;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->stub = new StubWithInheritDoc();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         unset($this->stub);
         parent::tearDown();
