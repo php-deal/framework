@@ -7,7 +7,7 @@
     },
     "require-dev": {
         "beberlei/assert": "~3.0",
-        "phpstan/phpstan": "^0.11.0",
+        "phpstan/phpstan": "^0.12.83",
         "phpunit/phpunit": "^7.5",
         "roave/security-advisories": "dev-master",
         "slevomat/coding-standard": "^4.8",
