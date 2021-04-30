@@ -1,0 +1,13 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: phpstan/phpstan
+    versions:
+    - 0.12.82
+    - 0.12.83
+    - 0.12.84
