@@ -1,0 +1,16 @@
+{
+    "name": "php-deal",
+    "owner": {
+        "name": "PhpDeal"
+    },
+    "description": "Claude Code plugins of the PhpDeal Design by Contract framework for PHP",
+    "plugins": [
+        {
+            "name": "php-deal",
+            "source": "./",
+            "description": "Turns business specifications into self-checking PHP code with php-deal/framework contracts and into PHPUnit tests derived from those contracts.",
+            "category": "development",
+            "tags": ["php", "design-by-contract", "testing"]
+        }
+    ]
+}

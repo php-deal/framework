@@ -52,6 +52,7 @@ new Account()->deposit(-10);
 - [Writing expressions](#writing-expressions)
 - [Handling violations](#handling-violations)
 - [PHPStan integration](#phpstan-integration)
+- [AI coding agents](#ai-coding-agents)
 - [Production](#production)
 - [Upgrading from 1.x](#upgrading-from-1x)
 - [Contributing](#contributing)
@@ -364,6 +365,35 @@ include it in your `phpstan.neon`:
 ```neon
 includes:
     - vendor/php-deal/framework/extension.neon
+```
+
+## AI coding agents
+
+PhpDeal ships an [Agent Skill](https://agentskills.io) that teaches AI coding agents to turn a business
+specification into self-checking code: it extracts the rules, maps each one to a `#[Verify]`, `#[Ensure]` or
+`#[Invariant]` (or to plain code for business errors), writes the classes, checks the contract expressions and
+derives PHPUnit tests from the contracts. The tests cover the examples of the specification, the boundaries of the
+preconditions and random sequences of valid calls.
+
+In Claude Code, install it as a plugin from this repository:
+
+```
+/plugin marketplace add php-deal/framework
+/plugin install php-deal@php-deal
+```
+
+Then ask for it, e.g. *"Implement docs/booking-spec.md with Design by Contract"*, or run
+`/php-deal:design-by-contract`. Other agents that read the Agent Skills format can use the folder
+[`skills/design-by-contract`](skills/design-by-contract) directly. It is also installed with the package, at
+`vendor/php-deal/framework/skills/design-by-contract`.
+
+The skill bundles a checker for contract expressions, which works without an AI as well. Contracts are strings, so
+neither PHP nor PHPStan see their mistakes. The checker reports syntax errors, misspelled variables, `$__old` or
+`$__result` in the wrong kind of contract, `$this` in static methods, names that `use` imports do not resolve, and
+more:
+
+```bash
+php vendor/php-deal/framework/skills/design-by-contract/scripts/lint-contracts.php src
 ```
 
 ## Production

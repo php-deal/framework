@@ -22,6 +22,10 @@
         <testsuite name="functional">
             <directory>tests/Functional</directory>
         </testsuite>
+        <testsuite name="skill">
+            <directory>tests/Skill</directory>
+            <directory>skills/design-by-contract/examples</directory>
+        </testsuite>
     </testsuites>
 
     <source>

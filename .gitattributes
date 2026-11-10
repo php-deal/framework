@@ -9,5 +9,6 @@
 /phpunit.xml.dist     export-ignore
 /CONTRIBUTING.md      export-ignore
 /AGENTS.md            export-ignore
+/.claude-plugin       export-ignore
 
 *.php diff=php

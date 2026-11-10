@@ -1,0 +1,14 @@
+{
+    "name": "php-deal",
+    "displayName": "PhpDeal: Design by Contract",
+    "version": "2.0.0",
+    "description": "Turns business specifications into self-checking PHP code with php-deal/framework contracts (#[Verify], #[Ensure], #[Invariant]) and into PHPUnit tests derived from those contracts.",
+    "author": {
+        "name": "PhpDeal contributors",
+        "url": "https://github.com/php-deal/framework/graphs/contributors"
+    },
+    "homepage": "https://github.com/php-deal/framework",
+    "repository": "https://github.com/php-deal/framework",
+    "license": "MIT",
+    "keywords": ["php", "design-by-contract", "contracts", "preconditions", "postconditions", "invariants", "phpunit", "specification"]
+}

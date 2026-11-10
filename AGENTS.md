@@ -41,10 +41,13 @@ lowest-dependencies job and `composer audit`.
 | `src/Exception/`             | `ContractViolation` and its subclasses, `InvalidContractException`, `ExceptionInterface`. |
 | `src/PHPStan/`               | PHPStan extension (registered by `extension.neon`): members used only by contracts count as used. |
 | `src/ContractApplication.php`| The aspect kernel; `registerAspects()` for apps that have their own kernel. |
-| `tests/Fixtures/`            | Classes **woven** by the test bootstrap. Only this directory is in `includePaths`. |
+| `tests/Fixtures/`            | Classes **woven** by the test bootstrap. Only this directory and the skill example are in `includePaths`. |
 | `tests/Functional/`          | Tests that call fixtures through real weaving. |
 | `tests/Unit/`                | Tests without weaving; `tests/Unit/Stub/FakeInvocation.php` is a hand-made `MethodInvocation`. |
+| `tests/Skill/`               | Tests of the contract checker of the skill (suite `skill`, with the skill example). |
 | `demo/`                      | Runnable example, also run in CI. |
+| `skills/design-by-contract/` | Agent Skill for users' AI agents: `SKILL.md`, `references/`, the contract checker in `scripts/`, and a worked example in `examples/` that the test suite weaves and runs. |
+| `.claude-plugin/`            | Manifests that publish the repository as a Claude Code plugin marketplace with the skill. |
 
 ## How it works (read before changing behaviour)
 
@@ -100,4 +103,7 @@ lowest-dependencies job and `composer audit`.
 
 1. `composer test` passes.
 2. Behaviour changes are reflected in `README.md`, `CHANGELOG.md` and, if they break BC, `UPGRADE-2.0.md`.
-3. README code examples still work: they are meant to be copy-paste runnable.
+   Changes to expressions, variables, inheritance or weaving also go into `skills/design-by-contract/` (the skill
+   and its checker teach those rules to users' agents). Bump `version` in `.claude-plugin/plugin.json` together with
+   a release, and run `claude plugin validate . --strict` when you change the manifests.
+3. README and skill code examples still work: they are meant to be copy-paste runnable.
