@@ -20,6 +20,7 @@ use PhpDeal\Aspect\PostconditionCheckerAspect;
 use PhpDeal\Aspect\PreconditionCheckerAspect;
 use PhpDeal\Contract\ContractEvaluator;
 use PhpDeal\Contract\ContractFetcher;
+use PhpDeal\Contract\ContractRewriter;
 
 /**
  * Aspect kernel that enables Design by Contract checks
@@ -40,7 +41,8 @@ class ContractApplication extends AspectKernel
     /**
      * Registers the contract aspects in an aspect container
      *
-     * Call it from `configureAop()` of your own aspect kernel to combine contracts with other aspects.
+     * On PHP 8.5+ it also registers {@see ContractRewriter}, which compiles the contract expressions into the woven
+     * classes. Call it from `configureAop()` of your own aspect kernel to combine contracts with other aspects.
      */
     public static function registerAspects(AspectContainer $container): void
     {
@@ -59,6 +61,10 @@ class ContractApplication extends AspectKernel
             InvariantCheckerAspect::class,
             static fn(): InvariantCheckerAspect => new InvariantCheckerAspect($fetcher, $evaluator),
         );
+        // Closures in attributes need PHP 8.5, older versions evaluate the expressions with eval()
+        if (\PHP_VERSION_ID >= 80500) {
+            $container->addLazyService(ContractRewriter::class, static fn(): ContractRewriter => new ContractRewriter());
+        }
     }
 
     protected function configureAop(AspectContainer $container): void

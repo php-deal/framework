@@ -21,9 +21,10 @@ use PhpDeal\Exception\InvalidContractException;
 use Throwable;
 
 /**
- * Compiles contract expressions into closures and evaluates them for a method invocation
+ * Evaluates contracts for a method invocation
  *
- * Every expression is compiled once per process. While a contract is evaluated, contracts of nested calls are not
+ * Contracts compiled while the class was woven (PHP 8.5+, see {@see ContractRewriter}) are called directly. Other
+ * expressions are compiled with eval() into closures, once per process. While a contract is evaluated, contracts of nested calls are not
  * checked, so an invariant may call public methods of its own class without recursing endlessly.
  */
 final class ContractEvaluator
@@ -82,23 +83,12 @@ final class ContractEvaluator
         $location = $invocation->getMethod()->class . '::' . $invocation->getMethod()->name . '()';
         foreach ($contracts as $boundContract) {
             $expression = $boundContract->contract->expression;
-            $isStatic   = $instance === null;
-            if ($isStatic && \preg_match('/\$this\b/', $expression) === 1) {
-                throw InvalidContractException::forStaticContext($expression, $location);
-            }
-            try {
-                $closure = $this->compile($expression, $isStatic);
-            } catch (ParseError $error) {
-                throw InvalidContractException::forSyntaxError($expression, $location, $error);
-            }
-            $evaluator = Closure::bind($closure, $instance, $boundContract->scope);
-            if ($evaluator === null) {
-                throw InvalidContractException::forStaticContext($expression, $location);
-            }
+            $evaluator  = $boundContract->check ?? $this->bindExpression($boundContract, $instance, $location);
 
             ++$this->depth;
             try {
-                $result = $evaluator($variables);
+                // A compiled contract takes the object first, then the variables by name
+                $result = $boundContract->check !== null ? $evaluator($instance, ...$variables) : $evaluator($variables);
             } catch (Throwable $error) {
                 // Assertion libraries signal failures with exceptions, broken expressions with errors
                 throw $kind->createViolation($invocation, $expression, $error);
@@ -114,6 +104,32 @@ final class ContractEvaluator
                 throw InvalidContractException::forInvalidResult($expression, $location, $result);
             }
         }
+    }
+
+    /**
+     * Compiles the expression with eval() and binds it to the object, for contracts that were not compiled while
+     * the class was woven
+     *
+     * @throws InvalidContractException When the expression is not valid PHP or uses $this in a static method
+     */
+    private function bindExpression(BoundContract $boundContract, ?object $instance, string $location): Closure
+    {
+        $expression = $boundContract->contract->expression;
+        $isStatic   = $instance === null;
+        if ($isStatic && \preg_match('/\$this\b/', $expression) === 1) {
+            throw InvalidContractException::forStaticContext($expression, $location);
+        }
+        try {
+            $closure = $this->compile($expression, $isStatic);
+        } catch (ParseError $error) {
+            throw InvalidContractException::forSyntaxError($expression, $location, $error);
+        }
+        $evaluator = Closure::bind($closure, $instance, $boundContract->scope);
+        if ($evaluator === null) {
+            throw InvalidContractException::forStaticContext($expression, $location);
+        }
+
+        return $evaluator;
     }
 
     /**

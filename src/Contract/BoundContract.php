@@ -13,7 +13,11 @@ declare(strict_types=1);
 
 namespace PhpDeal\Contract;
 
+use Closure;
 use PhpDeal\Attribute\Contract;
+use PhpDeal\Attribute\Ensure;
+use PhpDeal\Attribute\Invariant;
+use PhpDeal\Attribute\Verify;
 
 /**
  * A contract together with the class scope its expression is evaluated in
@@ -24,11 +28,22 @@ use PhpDeal\Attribute\Contract;
 final readonly class BoundContract
 {
     /**
+     * Compiled expression bound to the scope, null when the expression is evaluated with eval()
+     */
+    public ?Closure $check;
+
+    /**
      * @param Contract     $contract Contract attribute
      * @param class-string $scope    Class scope for the expression
      */
     public function __construct(
         public Contract $contract,
         public string $scope,
-    ) {}
+    ) {
+        // Contract implementations of other packages are always evaluated with eval()
+        $isCompilable = $contract instanceof Verify || $contract instanceof Ensure || $contract instanceof Invariant;
+        $check        = $isCompilable ? $contract->check : null;
+        // The closure is declared in the woven trait or the interface, it must run in the scope of the contract
+        $this->check = $check !== null ? Closure::bind($check, null, $scope) : null;
+    }
 }

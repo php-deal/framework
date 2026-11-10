@@ -20,6 +20,7 @@ use PhpDeal\Tests\Unit\Stub\Square;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use ReflectionFunction;
 use RuntimeException;
 use stdClass;
 use Throwable;
@@ -135,6 +136,42 @@ final class ContractEvaluatorTest extends TestCase
             [],
             ContractKind::Postcondition,
         );
+    }
+
+    public function testCompiledContractIsCalledInTheScopeOfTheContract(): void
+    {
+        $invocation = FakeInvocation::on(new Square(), 'scale', 2.0);
+        // The expression is not evaluated when a compiled closure is given
+        $contract = new BoundContract(
+            new Verify('false', static fn(Square $__this, float $factor): bool => $factor === 2.0),
+            Square::class,
+        );
+
+        $this->evaluator->check($invocation, [$contract], ['factor' => 2.0], ContractKind::Precondition);
+
+        self::assertNotNull($contract->check);
+        self::assertSame(Square::class, new ReflectionFunction($contract->check)->getClosureScopeClass()?->name);
+        self::assertFalse($this->evaluator->isEvaluating());
+    }
+
+    public function testCompiledContractReportsTheExpression(): void
+    {
+        $invocation = FakeInvocation::on(new Square(), 'scale', 2.0);
+        $contracts  = [new BoundContract(new Ensure('$__result > 5', static fn($__this, $__result): bool => $__result > 5), Square::class)];
+
+        $this->expectException(PostconditionViolation::class);
+        $this->expectExceptionMessage('Postcondition "$__result > 5" violated');
+        $this->evaluator->check($invocation, $contracts, ['__result' => 4.0], ContractKind::Postcondition);
+    }
+
+    public function testCompiledContractGetsNoObjectInStaticMethod(): void
+    {
+        $invocation = FakeInvocation::onStatic(Square::class, 'create');
+        $contracts  = [new BoundContract(new Ensure('true', static fn($__this): bool => $__this === null), Square::class)];
+
+        $this->evaluator->check($invocation, $contracts, [], ContractKind::Postcondition);
+
+        $this->addToAssertionCount(1);
     }
 
     public function testSyntaxErrorIsInvalid(): void

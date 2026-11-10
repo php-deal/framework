@@ -28,6 +28,10 @@ specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.
   PHPUnit tests derived from the contracts. It is installable as a Claude Code plugin from this repository
   (`/plugin marketplace add php-deal/framework`) (#36).
 - Static checker for contract expressions, `skills/design-by-contract/scripts/lint-contracts.php`.
+- On PHP 8.5+ contract expressions are compiled into static closures while Go! AOP weaves the class, on the line of
+  the attribute (new `check` argument of `#[Verify]`, `#[Ensure]` and `#[Invariant]`, filled in by PhpDeal). They are
+  cached by opcache, run without `eval()`, and breakpoints and stack traces point to the contract. Expressions that
+  could behave differently as a static closure, and PHP 8.4, keep using `eval()` (#76).
 
 ### Changed
 

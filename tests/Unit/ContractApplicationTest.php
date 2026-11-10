@@ -9,6 +9,7 @@ use Go\Core\AspectContainer;
 use PhpDeal\Aspect\InvariantCheckerAspect;
 use PhpDeal\Aspect\PostconditionCheckerAspect;
 use PhpDeal\Aspect\PreconditionCheckerAspect;
+use PhpDeal\Contract\ContractRewriter;
 use PhpDeal\ContractApplication;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -18,10 +19,14 @@ final class ContractApplicationTest extends TestCase
 {
     public function testRegistersEveryContractAspect(): void
     {
+        $expected = [PreconditionCheckerAspect::class, PostconditionCheckerAspect::class, InvariantCheckerAspect::class];
+        if (\PHP_VERSION_ID >= 80500) {
+            $expected[] = ContractRewriter::class;
+        }
         $container = $this->createMock(AspectContainer::class);
         $factories = [];
         $container
-            ->expects(self::exactly(3))
+            ->expects(self::exactly(\count($expected)))
             ->method('addLazyService')
             ->willReturnCallback(static function (string $id, Closure $factory) use (&$factories): void {
                 $factories[$id] = $factory;
@@ -29,13 +34,13 @@ final class ContractApplicationTest extends TestCase
 
         ContractApplication::registerAspects($container);
 
-        self::assertSame(
-            [PreconditionCheckerAspect::class, PostconditionCheckerAspect::class, InvariantCheckerAspect::class],
-            \array_keys($factories),
-        );
+        self::assertSame($expected, \array_keys($factories));
         self::assertInstanceOf(PreconditionCheckerAspect::class, $factories[PreconditionCheckerAspect::class]($container));
         self::assertInstanceOf(PostconditionCheckerAspect::class, $factories[PostconditionCheckerAspect::class]($container));
         self::assertInstanceOf(InvariantCheckerAspect::class, $factories[InvariantCheckerAspect::class]($container));
+        if (isset($factories[ContractRewriter::class])) {
+            self::assertInstanceOf(ContractRewriter::class, $factories[ContractRewriter::class]($container));
+        }
     }
 
     public function testKernelIsRunning(): void

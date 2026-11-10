@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace PhpDeal\Contract;
 
+use Go\Aop\Framework\AbstractMethodInvocation;
 use Go\Aop\Proxy;
+use Go\Core\AspectContainer;
 use PhpDeal\Attribute\Contract;
 use PhpDeal\Attribute\Ensure;
 use PhpDeal\Attribute\Inherit;
@@ -160,8 +162,35 @@ final class ContractFetcher
     {
         return \array_map(
             static fn(ReflectionAttribute $attribute): BoundContract => new BoundContract($attribute->newInstance(), $scope),
-            $reflector->getAttributes($type, ReflectionAttribute::IS_INSTANCEOF),
+            self::getOriginalDeclaration($reflector)->getAttributes($type, ReflectionAttribute::IS_INSTANCEOF),
         );
+    }
+
+    /**
+     * Returns the declaration written in the source, which holds the contracts compiled while weaving
+     *
+     * Go! AOP moves the body of a woven class into its `...OriginalTrait` and re-declares the attributes on the proxy
+     * from the syntax tree, without the compiled closures. The trait and the `...OriginalAlias` methods keep them.
+     *
+     * @param ReflectionClass<covariant object>|ReflectionMethod $reflector
+     *
+     * @return ReflectionClass<covariant object>|ReflectionMethod
+     */
+    private static function getOriginalDeclaration(ReflectionClass|ReflectionMethod $reflector): ReflectionClass|ReflectionMethod
+    {
+        if ($reflector instanceof ReflectionClass) {
+            return $reflector->getTraits()[$reflector->name . AspectContainer::ORIGINAL_TRAIT_SUFFIX] ?? $reflector;
+        }
+        $class     = $reflector->getDeclaringClass();
+        $aliasName = $reflector->name . AbstractMethodInvocation::TRAIT_ALIAS_SUFFIX;
+        if ($class->hasMethod($aliasName)) {
+            $alias = $class->getMethod($aliasName);
+            if ($alias->getDeclaringClass()->name === $class->name) {
+                return $alias;
+            }
+        }
+
+        return $reflector;
     }
 
     /**

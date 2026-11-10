@@ -240,8 +240,9 @@ random values, and `\in_array()` without strict comparison.
 - 🧬 **Contract inheritance** from parent classes and interfaces, with clear and predictable rules.
 - 🔒 **Full access to the object**: expressions run in the scope of the class and can read private state.
 - 🕰️ **`$__old` and `$__result`** to compare the state before and after a call, and to check return values.
-- ⚡ **Fast**: each expression is compiled once, contracts are read once per class, and the object is cloned only when
-  a contract uses `$__old`.
+- ⚡ **Fast**: on PHP 8.5+ contracts are compiled into the woven classes, so opcache caches them and no `eval()` runs;
+  contracts are read once per class, and the object is cloned only when a contract uses `$__old`.
+- 🐞 **Debuggable**: on PHP 8.5+ a breakpoint on a contract line stops in the contract, and stack traces point to it.
 - 🔁 **Recursion-safe**: an invariant may call public methods of its own class.
 - 🧩 **Works with assertion libraries** such as [beberlei/assert](https://github.com/beberlei/assert).
 - 🔍 **PHPStan extension** included: properties and methods used only by contracts are not reported as unused.
@@ -475,8 +476,8 @@ violated. Returning `null` is accepted too, for assertion helpers that return no
 - **Scope.** The expression runs in the scope of the class that declares it, so it can read private and protected
   members with `$this->`, `self::` and `static::`. Contracts of an interface run in the scope of the implementing
   class. Static methods have no `$this`.
-- **Names.** The expression is compiled outside of your file, so `use` imports do not apply: write class and function
-  names fully qualified, e.g. `'\App\Money::isValid($amount)'` or `'Assert\Assertion::email($email)'`.
+- **Names.** The expression is written for the global namespace, so `use` imports do not apply: write class and
+  function names fully qualified, e.g. `'\App\Money::isValid($amount)'` or `'Assert\Assertion::email($email)'`.
 - **Errors.** An error or exception thrown by the expression is reported as a violation of the contract, with the
   original error as the previous exception. Assertion libraries can be used that way:
 
@@ -487,6 +488,26 @@ public function setDiscount(int $percent): void {}
 
 - **Mistakes in contracts.** A syntax error, a `$this` in a static method or a result that is neither a boolean nor
   `null` throws an `InvalidContractException`: this is a bug in the contract itself, not a violation of it.
+
+### Compiled contracts (PHP 8.5+)
+
+On PHP 8.5 and newer, PhpDeal compiles every expression into a static closure while Go! AOP weaves the class, and
+adds it to the attribute on the same line. The woven cache file contains, for example:
+
+```php
+#[Verify('$amount > 0', check: static function ($__this, $amount, ...$__arguments) { return ($amount > 0); })]
+```
+
+You never write `check:` yourself. Compiled contracts are cached by opcache, can be preloaded, and run without
+`eval()`, so they also work on hosts that forbid it. A breakpoint on the line of a contract stops inside it, and an
+error raised by the expression points to that line. The cache is built by `cache:warmup:aop` as usual.
+
+An expression is evaluated with `eval()` instead, as on PHP 8.4, when it could behave differently as a static closure:
+a syntax error or `$this` in a static method (both still throw `InvalidContractException` when the method is called),
+`static::` or `self::method()` in an instance context, a nested `function () {}`, magic constants such as `__CLASS__`,
+variable variables, `compact()`/`extract()`/`get_defined_vars()`, a newline inside a string literal, and an
+invariant that reads a variable other than `$this` and `$__result`. Classes that are not woven, and `Contract`
+implementations of other packages, use `eval()` too.
 
 ## Handling violations
 
@@ -543,7 +564,8 @@ if (($_SERVER['APP_ENV'] ?? 'prod') !== 'prod') {
 
 Without the kernel the attributes are plain metadata, and your classes run untouched. If you keep contracts in
 production, set `'debug' => false` and warm up the cache at deploy time, see the
-[Go! AOP deployment guide](https://github.com/goaop/framework/blob/master/docs/configuration.md).
+[Go! AOP deployment guide](https://github.com/goaop/framework/blob/master/docs/configuration.md). Build the cache
+with the PHP version that runs it: a cache woven on PHP 8.5 holds closures in attributes, which PHP 8.4 can not load.
 
 ## Upgrading from 1.x
 
