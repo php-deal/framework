@@ -101,6 +101,12 @@ private `__clone()`, for example), `$__old` is undefined.
 **Arrays.** `===` on arrays compares keys, values, types and order, while `==` ignores order and types. Pick the one
 the rule means. For "nothing else changed" use `'$this->lines === $__old->lines'`.
 
+**Variadics.** `int ...$amounts` arrives as a list. `$amounts > 0` compares an array with a number and is always
+true. Check the items: `'$amounts !== [] && \min($amounts) > 0'`.
+
+**Constructors.** `#[Verify]` and `#[Ensure]` work on constructors. There `$__result` is always `null`, and `$__old`
+is a clone of the object before its properties are set, so reading a typed property from it fails. Check `$this`.
+
 **Nullables.** Guard first: `'$discount === null || ($discount > 0 && $discount <= 100)'`.
 
 **Implications.** "If shipped, it has a tracking number" is `'$this->status !== \App\Status::Shipped || $this->tracking !== null'`.

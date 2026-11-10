@@ -43,6 +43,7 @@ final class ContractLinterTest extends TestCase
                 }
 
                 #[Verify('\App\Money::isValid($amount) && $amount !== \PHP_INT_MAX')]
+                #[Verify('\in_array($amount, [1, 2], true) && self::rand() > 0 && $amount > new \DateTimeImmutable("2020-01-01")->getTimestamp()')]
                 #[Ensure('$__result >= 0')]
                 public static function round(int $amount = 0): int
                 {
@@ -164,6 +165,26 @@ final class ContractLinterTest extends TestCase
         yield 'superglobal' => [
             "class A { #[Verify('\$_SERVER !== []')] public function f(): void {} }",
             ['warning: A contract should not depend on $_SERVER'],
+        ];
+        yield 'result in a constructor' => [
+            "class A { #[Ensure('\$__result !== null')] public function __construct() {} }",
+            ['warning: $__result is always null in a constructor: check $this instead'],
+        ];
+        yield 'old state in a constructor' => [
+            "class A { #[Ensure('\$__old->a === 0')] public function __construct(public int \$a = 1) {} }",
+            ['warning: $__old in a constructor is the object before its properties are set'],
+        ];
+        yield 'current time' => [
+            "class A { #[Verify('\$at < new \\DateTimeImmutable()')] public function f(\\DateTimeImmutable \$at): void {} }",
+            ['warning: The contract reads the current time, so it can fail at random: pass the time in as an argument'],
+        ];
+        yield 'random value' => [
+            "class A { #[Verify('\\random_int(0, 1) === 0')] public function f(): void {} }",
+            ['warning: random_int() returns a different value on every call, so the contract can fail at random'],
+        ];
+        yield 'loose in_array' => [
+            "class A { #[Verify('\\in_array(\$c, [1, 2])')] public function f(int \$c): void {} }",
+            ['warning: in_array() compares loosely without its strict argument: pass true'],
         ];
         yield 'contract without expression' => [
             'class A { #[Verify] public function f(): void {} }',

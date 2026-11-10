@@ -54,7 +54,8 @@ Copy this checklist and work through it:
 ### 1. Check the project setup
 
 - `composer.json` requires `php-deal/framework` (2.x) and PHP 8.4 or newer. If it does not, ask before adding the
-  dependency with `composer require php-deal/framework`.
+  dependency with `composer require php-deal/framework`. Without a `composer.json` you can inspect, rely on the weaving
+  check in step 7: one test that breaks a precondition must throw `PreconditionViolation`.
 - Contracts are checked only in woven classes. `ContractApplication::getInstance()->init([...])` must run before the
   classes are autoloaded, in the front controller and in the test bootstrap. Its `includePaths` must cover the
   directory of the new classes. If the project already has its own Go! AOP kernel, it calls
@@ -67,7 +68,9 @@ Copy this checklist and work through it:
 Read the specification and list every statement that constrains state, input, output or behaviour. Give each one a
 stable ID (`R1`, `R2`, ...), or keep the IDs the specification already uses. Quote the source wording. Do not invent
 rules. When the specification is ambiguous or silent, write the question down and pick the most conservative
-assumption, which is usually the stricter precondition.
+assumption, which is usually the stricter precondition. Data that the API needs but the specification only implies,
+such as an id or the name of the person who acts, is API design: add it, list it as an assumption (`A1`, `A2`, ...),
+and constrain it only as far as the code needs.
 
 ### 3. Classify each rule
 
@@ -109,14 +112,19 @@ Expression rules. Every one of them breaks contracts silently when ignored:
 - Write expressions in **single quotes**: `#[Verify('$amount > 0')]`. In double quotes PHP would interpolate `$amount`.
 - **No `use` imports inside expressions.** Write class names fully qualified (`\App\Money::isValid($amount)`), and
   global functions with a leading backslash (`\count($items)`). `self::`, `static::` and `parent::` work.
-- Arguments are available by parameter name, with defaults filled in. A variadic parameter is a list.
+- Arguments are available by parameter name, with defaults filled in. A variadic parameter is a list: check its
+  items (`\min($amounts) > 0`), because comparing the list with a number (`$amounts > 0`) is always true.
 - `$__result` (return value) and `$__old` (clone of the object before the call) exist only in `#[Ensure]`. `$__old`
   is a **shallow** clone: compare scalars, or add a `__clone()` that copies mutable objects.
 - A contract returns `true` (holds), `false` (violated) or `null` (for assertion libraries). Any other value throws
   `InvalidContractException`.
 - Contracts must have no side effects. Do not use `$this` in static methods.
 - Postconditions and invariants are not checked when the method throws.
-- Invariants are checked after the constructor and after every **public** method, not after private ones.
+- `#[Verify]` and `#[Ensure]` work on every method: constructors, private, protected and static ones. Invariants are
+  checked after the constructor and after every **public** method, not after private ones. `final` classes are
+  woven as well.
+- In a constructor `$__result` is always `null` and `$__old` is the object before its properties are set: check
+  `$this` instead.
 
 [references/expressions.md](references/expressions.md) has the full reference and the pitfalls of floats, dates,
 enums, collections and nullables.
@@ -135,8 +143,9 @@ php ${CLAUDE_SKILL_DIR}/scripts/lint-contracts.php --strict src/Inventory
 `${CLAUDE_SKILL_DIR}` is the directory of this file. In projects with php-deal installed the checker is also at
 `vendor/php-deal/framework/skills/design-by-contract/scripts/lint-contracts.php`. It reports syntax errors, unknown
 or misspelled variables, `$__old` or `$__result` in the wrong contract, `$this` in static methods, imported names
-that do not resolve, double-quoted strings and assignments. Fix every error and warning. It can not check types or
-the existence of properties: the tests in the next step do that.
+that do not resolve, double-quoted strings, assignments, the current time or random values, and `\in_array()`
+without `true`. Fix every error and warning. It can not check types or the existence of properties: the tests in the
+next step do that.
 
 ### 7. Derive the tests
 
@@ -159,7 +168,8 @@ make a test pass unless the specification supports the weaker version.
 
 End with:
 
-- a table `Rule | Contract or code | Class::method | Test`, with one row per rule;
+- a table `Rule | Contract or code | Where | Test`, with one row per rule (`Where` is `Class::method`, or `Class` for
+  an invariant);
 - the assumptions you made, and the open questions for the business;
 - the rules that are not contracts, and where they are handled instead.
 

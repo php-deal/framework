@@ -74,3 +74,7 @@ thrown, the class is not woven. Check the following:
   bootstrap);
 - the file is inside `includePaths` and not inside `excludePaths`;
 - the cache is stale: delete `cacheDir` and run again.
+
+If the first run after deleting the cache crashes with a segmentation fault (exit code 139) and later runs pass,
+the PHP opcache JIT is crashing while classes are woven. Run once with `php -d opcache.jit=off vendor/bin/phpunit`,
+or turn the JIT off for the CLI in tests. This is a PHP problem, not a broken contract.

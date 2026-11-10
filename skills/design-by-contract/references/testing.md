@@ -206,3 +206,7 @@ Do not delete or weaken a contract only to get a green run.
 
 After the tests pass, compare the rule table with the tests. Each `#[Ensure]` should run in at least one test, and so
 should each method of a class with an `#[Invariant]`. A contract that never runs proves nothing.
+
+To prove that a contract catches bugs, break the code on purpose: change one line in a method body (an off-by-one,
+a forgotten update, a removed check), run the tests, and expect a violation of the contract for that rule. Restore
+the line afterwards. When nothing fails, the contract is too weak, or no test reaches it.

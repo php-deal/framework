@@ -47,6 +47,16 @@ final class ContractLinter
         \T_POW_EQUAL, \T_COALESCE_EQUAL, \T_AND_EQUAL, \T_OR_EQUAL, \T_XOR_EQUAL, \T_SL_EQUAL, \T_SR_EQUAL, \T_UNSET,
     ];
 
+    /**
+     * Functions whose result changes from call to call: a contract that uses them can fail at random
+     */
+    private const array NONDETERMINISTIC = ['time', 'microtime', 'hrtime', 'rand', 'mt_rand', 'random_int', 'random_bytes', 'uniqid', 'lcg_value'];
+
+    /**
+     * Functions that compare loosely unless their "strict" argument is true, with the position of that argument
+     */
+    private const array LOOSE_BY_DEFAULT = ['in_array' => 3, 'array_search' => 3, 'array_keys' => 3];
+
     private const string PREFIX = '<?php return static function (array $__contractVariables): mixed { return (';
 
     /**
@@ -308,6 +318,9 @@ final class ContractLinter
             if ($token->id === \T_STRING) {
                 self::checkName($tokens, $index, $report);
             }
+            if ($token->id === \T_STRING || $token->id === \T_NAME_FULLY_QUALIFIED) {
+                self::checkCall($tokens, $index, $report);
+            }
         }
 
         return $issues;
@@ -331,6 +344,8 @@ final class ContractLinter
                     $report(Severity::Error, "\$__old is available only in #[Ensure], not in #[{$contract->kind}]");
                 } elseif ($target->isStatic) {
                     $report(Severity::Error, "\$__old is not available in the static method {$where}");
+                } elseif (\strtolower($target->name) === '__construct') {
+                    $report(Severity::Warning, '$__old in a constructor is the object before its properties are set');
                 }
 
                 return;
@@ -339,6 +354,8 @@ final class ContractLinter
                     $report(Severity::Error, '$__result is not known before the call: check the result with #[Ensure]');
                 } elseif ($contract->kind === 'Invariant') {
                     $report(Severity::Warning, '$__result in an invariant is the result of whichever public method ran last');
+                } elseif (\strtolower($target->name) === '__construct') {
+                    $report(Severity::Warning, '$__result is always null in a constructor: check $this instead');
                 } elseif ($target->returnType === 'void' || $target->returnType === 'never') {
                     $report(Severity::Warning, "\$__result is always null: {$where} returns {$target->returnType}");
                 }
@@ -397,6 +414,67 @@ final class ContractLinter
             return;
         }
         $report(Severity::Error, "Class {$name} would be looked up in the global namespace: a contract does not see \"use\" imports, write the fully qualified name");
+    }
+
+    /**
+     * Reports function calls and instantiations that make a contract unreliable
+     *
+     * @param list<PhpToken>                   $tokens
+     * @param callable(Severity, string): void $report
+     */
+    private static function checkCall(array $tokens, int $index, callable $report): void
+    {
+        $name     = \strtolower(\ltrim($tokens[$index]->text, '\\'));
+        $previous = $tokens[$index - 1] ?? null;
+        $isNew    = $previous !== null && $previous->id === \T_NEW;
+        if ($previous !== null && !$isNew && \in_array($previous->id, [\T_OBJECT_OPERATOR, \T_NULLSAFE_OBJECT_OPERATOR, \T_DOUBLE_COLON, \T_FUNCTION, \T_FN], true)) {
+            return;
+        }
+        $hasArguments = ($tokens[$index + 1]->text ?? '') === '(' && ($tokens[$index + 2]->text ?? '') !== ')';
+        if ($isNew && \str_starts_with($name, 'datetime') && !$hasArguments) {
+            $report(Severity::Warning, 'The contract reads the current time, so it can fail at random: pass the time in as an argument');
+
+            return;
+        }
+        if ($isNew || ($tokens[$index + 1]->text ?? '') !== '(') {
+            return;
+        }
+        if (\in_array($name, self::NONDETERMINISTIC, true)) {
+            $report(Severity::Warning, "{$name}() returns a different value on every call, so the contract can fail at random");
+
+            return;
+        }
+        $strictPosition = self::LOOSE_BY_DEFAULT[$name] ?? null;
+        if ($strictPosition !== null && self::countArguments($tokens, $index + 1) < $strictPosition) {
+            $report(Severity::Warning, "{$name}() compares loosely without its strict argument: pass true");
+        }
+    }
+
+    /**
+     * Counts the arguments of the call whose opening parenthesis is at $open
+     *
+     * @param list<PhpToken> $tokens
+     */
+    private static function countArguments(array $tokens, int $open): int
+    {
+        $depth  = 0;
+        $commas = 0;
+        $count  = \count($tokens);
+        for ($index = $open; $index < $count; ++$index) {
+            $text = $tokens[$index]->text;
+            if ($text === '(' || $text === '[' || $text === '{') {
+                ++$depth;
+            } elseif ($text === ')' || $text === ']' || $text === '}') {
+                if (--$depth === 0) {
+                    break;
+                }
+            } elseif ($depth === 1 && $text === ',') {
+                ++$commas;
+            }
+        }
+        $isEmpty = ($tokens[$open + 1]->text ?? ')') === ')';
+
+        return $isEmpty ? 0 : $commas + 1;
     }
 
     /**
