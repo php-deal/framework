@@ -8,5 +8,6 @@
 /phpstan.neon.dist    export-ignore
 /phpunit.xml.dist     export-ignore
 /CONTRIBUTING.md      export-ignore
+/AGENTS.md            export-ignore
 
 *.php diff=php
