@@ -15,8 +15,9 @@ concurrency:
 
 jobs:
   tests:
-    name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }} deps)
+    name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }} deps${{ matrix.experimental && ', experimental' || '' }})
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -25,6 +26,9 @@ jobs:
         include:
           - php: '8.4'
             dependencies: lowest
+          - php: '8.6'
+            dependencies: highest
+            experimental: true
     steps:
       - uses: actions/checkout@v7
 
@@ -37,6 +41,7 @@ jobs:
       - uses: ramsey/composer-install@v4
         with:
           dependency-versions: ${{ matrix.dependencies }}
+          composer-options: ${{ matrix.experimental && '--ignore-platform-req=php+' || '' }}
 
       - name: Run test suite
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml

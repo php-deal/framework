@@ -36,7 +36,7 @@
     ],
     "require": {
         "php": "^8.4",
-        "goaop/framework": "^4.0"
+        "goaop/framework": "^4.0 || ^5.0@dev"
     },
     "require-dev": {
         "beberlei/assert": "^3.3.3",

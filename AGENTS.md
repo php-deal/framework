@@ -7,11 +7,12 @@ Guidance for AI coding agents working on this repository. Human contributors: se
 `php-deal/framework` is an AI Design by Contract library for PHP: AI agents turn business specifications into
 contracted code with the bundled Agent Skill, and the library enforces the contracts. Contracts are native attributes
 (`#[Verify]`, `#[Ensure]`, `#[Invariant]`, `#[Inherit]`) whose string arguments are PHP expressions. Aspects of
-[Go! AOP 4](https://github.com/goaop/framework) weave the annotated classes and evaluate the expressions on every
-call.
+[Go! AOP](https://github.com/goaop/framework) weave the annotated classes and evaluate the expressions on every call.
 
-- PHP **8.4+** (CI runs 8.4 and 8.5). Do not use PHP 8.5-only features; PHPStan analyses for the 8.4–8.5 range.
-- Runtime dependency: `goaop/framework ^4.0` only. Do not add runtime dependencies without a strong reason.
+- PHP **8.4+** (CI runs 8.4, 8.5 and an experimental 8.6 job). Do not use PHP 8.5-only features; PHPStan analyses
+  for the 8.4–8.5 range.
+- Runtime dependency: `goaop/framework` only; Composer installs the version that fits the PHP version, so code must
+  work with every major version `composer.json` allows. Do not add runtime dependencies without a strong reason.
 - Version 2.x is a major rewrite of 1.x (Doctrine annotations). Keep [UPGRADE-2.0.md](UPGRADE-2.0.md) and
   [CHANGELOG.md](CHANGELOG.md) in sync with behaviour changes.
 
