@@ -4,7 +4,8 @@ Guidance for AI coding agents working on this repository. Human contributors: se
 
 ## Project
 
-`php-deal/framework` is a Design by Contract library for PHP. Contracts are native attributes
+`php-deal/framework` is an AI Design by Contract library for PHP: AI agents turn business specifications into
+contracted code with the bundled Agent Skill, and the library enforces the contracts. Contracts are native attributes
 (`#[Verify]`, `#[Ensure]`, `#[Invariant]`, `#[Inherit]`) whose string arguments are PHP expressions. Aspects of
 [Go! AOP 4](https://github.com/goaop/framework) weave the annotated classes and evaluate the expressions on every
 call.
@@ -88,6 +89,8 @@ lowest-dependencies job and `composer audit`.
   Global functions in expressions are written `\is_numeric(...)`, and class names fully qualified, because `use`
   imports do not apply inside expressions.
 - Keep comments short and useful. Public API classes need a class docblock that explains their purpose.
+- The README leads with the AI workflow (specification → rules → contracts → code → tests). Present new features
+  from that angle first, then in the contract language reference.
 
 ## Testing tips
 

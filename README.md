@@ -2,37 +2,50 @@
 
 # PhpDeal
 
-**Design by Contract for modern PHP**
+**AI Design by Contract for PHP**
 
-Declare preconditions, postconditions and invariants with native attributes.<br>
-PhpDeal checks them on every call, powered by [Go! AOP](https://github.com/goaop/framework).
+Your AI agent turns business specifications into code that checks its own rules.<br>
+PhpDeal enforces those rules on every call, as native PHP attributes powered by [Go! AOP](https://github.com/goaop/framework).
 
 [![CI](https://github.com/php-deal/framework/actions/workflows/ci.yml/badge.svg)](https://github.com/php-deal/framework/actions/workflows/ci.yml)
 [![Latest Version](https://img.shields.io/packagist/v/php-deal/framework.svg?label=release)](https://packagist.org/packages/php-deal/framework)
 [![Total Downloads](https://img.shields.io/packagist/dt/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
 [![PHP Version](https://img.shields.io/badge/php-%E2%89%A5%208.4-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/releases/8.4/)
+[![Agent Skill](https://img.shields.io/badge/Agent%20Skill-design--by--contract-d97757.svg)](skills/design-by-contract/SKILL.md)
 [![Go! AOP](https://img.shields.io/badge/Go!%20AOP-4.x-1f6feb.svg)](https://github.com/goaop/framework)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-2a5ea7.svg)](https://phpstan.org/user-guide/rule-levels)
 [![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](LICENSE)
 
 </div>
 
+You write the rules in plain language:
+
+> **R1.** A deposit is a positive amount.<br>
+> **R2.** A deposit adds the amount to the balance.<br>
+> **R3.** The balance is never negative.
+
+Your agent turns them into contracts, the code and the tests:
+
 ```php
 use PhpDeal\Attribute\{Ensure, Invariant, Verify};
 
-#[Invariant('$this->balance >= 0')]
+#[Invariant('$this->balance >= 0')]                           // R3
 class Account
 {
     private float $balance = 0.0;
 
-    #[Verify('$amount > 0')]
-    #[Ensure('$this->balance === $__old->balance + $amount')]
+    #[Verify('$amount > 0')]                                   // R1
+    #[Ensure('$this->balance === $__old->balance + $amount')] // R2
     public function deposit(float $amount): void
     {
         $this->balance += $amount;
     }
 }
+```
 
+When the code or its caller breaks a rule, PhpDeal stops the call and names the rule:
+
+```php
 new Account()->deposit(-10);
 // PhpDeal\Exception\PreconditionViolation:
 // Precondition "$amount > 0" violated in Account->deposit(-10.0)
@@ -40,45 +53,193 @@ new Account()->deposit(-10);
 
 ## Contents
 
-- [Why Design by Contract?](#why-design-by-contract)
+- [Why AI Design by Contract?](#why-ai-design-by-contract)
+- [How it works](#how-it-works)
+- [Quick start](#quick-start)
+- [What the agent delivers](#what-the-agent-delivers)
+- [The contract checker](#the-contract-checker)
 - [Features](#features)
-- [Installation](#installation)
-- [Setup](#setup)
-- [Contracts](#contracts)
-  - [Preconditions: `#[Verify]`](#preconditions-verify)
-  - [Postconditions: `#[Ensure]`](#postconditions-ensure)
-  - [Invariants: `#[Invariant]`](#invariants-invariant)
-  - [Inheritance: `#[Inherit]`](#inheritance-inherit)
-- [Writing expressions](#writing-expressions)
-- [Handling violations](#handling-violations)
-- [PHPStan integration](#phpstan-integration)
-- [AI coding agents](#ai-coding-agents)
-- [Production](#production)
+- **The contract language**
+  - [Setup](#setup)
+  - [Contracts](#contracts): [`#[Verify]`](#preconditions-verify), [`#[Ensure]`](#postconditions-ensure),
+    [`#[Invariant]`](#invariants-invariant), [`#[Inherit]`](#inheritance-inherit)
+  - [Writing expressions](#writing-expressions)
+  - [Handling violations](#handling-violations)
+  - [PHPStan integration](#phpstan-integration)
+  - [Production](#production)
 - [Upgrading from 1.x](#upgrading-from-1x)
 - [Contributing](#contributing)
 
-## Why Design by Contract?
+## Why AI Design by Contract?
 
-[Design by Contract](https://en.wikipedia.org/wiki/Design_by_contract) treats the public API of a class as a formal
-agreement between the class and its callers:
+An AI agent writes code faster than anyone can review it. The hard question is no longer *how* to implement a
+feature but *whether the code does what the business asked*. The usual answers fall short:
 
-- **Preconditions** are the requirements upon the caller: what must be true before a method is called.
-- **Postconditions** are the promises of the method: what is true after it returns.
-- **Invariants** are the properties of an object that always hold between calls.
+- **Review** does not scale to every line an agent writes.
+- **Tests written by the same agent** share its reading of the requirements. When the agent misreads a rule, the
+  code and the tests agree with each other, and both are wrong.
+- **Requirements in a ticket** are forgotten by the next change, whether a person or an agent makes it.
 
-If the caller meets the requirements, the class delivers the promised service. A broken contract is a bug, and
-PhpDeal reports it at the exact place where it happens instead of letting a corrupt state travel through the
-application. The contracts live next to the code they describe, so they double as precise, executable
-documentation.
+[Design by Contract](https://en.wikipedia.org/wiki/Design_by_contract) closes that gap. Every business rule becomes
+an executable contract that lives next to the code it constrains:
+
+- **Preconditions** (`#[Verify]`) are what the caller must guarantee before a call.
+- **Postconditions** (`#[Ensure]`) are what the method promises after it returns.
+- **Invariants** (`#[Invariant]`) are what is always true of an object between calls.
+
+PhpDeal checks them on every call. That gives each party something it lacked:
+
+| For...           | Contracts give you                                                                                         |
+|------------------|------------------------------------------------------------------------------------------------------------|
+| **You**          | A one-line, reviewable statement of each rule, traced to the specification, instead of hundreds of lines of code |
+| **The agent**    | An immediate, exact signal: which rule broke, in which method, with which arguments. It fixes the code instead of guessing |
+| **The tests**    | An oracle on every call. Any test that drives the object through valid calls also checks every postcondition and invariant |
+| **The next change** | Rules that stay enforced. A later edit, by a person or an agent, can not quietly break one |
+
+A broken contract is a bug, reported at the exact place where it happens, before a corrupt state travels through
+the application.
+
+## How it works
+
+PhpDeal ships an [Agent Skill](https://agentskills.io), [`design-by-contract`](skills/design-by-contract/SKILL.md),
+that teaches your coding agent the whole workflow:
+
+```mermaid
+flowchart LR
+    spec[Business<br>specification] --> rules[Numbered<br>rules]
+    rules --> contracts[Contracts:<br>Verify, Ensure,<br>Invariant]
+    contracts --> code[Code]
+    code --> checker[Contract<br>checker]
+    checker --> tests[Tests derived<br>from contracts]
+    tests --> report[Rule table,<br>assumptions,<br>open questions]
+    tests -- violation --> code
+```
+
+1. **Extract the rules.** The agent reads the specification, numbers every rule (`R1`, `R2`, ...), and writes down
+   ambiguities as open questions instead of guessing.
+2. **Classify them.** Each rule becomes a precondition, a postcondition or an invariant. A business error that users
+   see, such as *"this room is already booked"*, stays as explicit code, because contracts are usually off in
+   production.
+3. **Write the code** with the contracts on the classes and interfaces, each one tagged with its rule ID.
+4. **Check the contracts.** A bundled checker finds mistakes inside the contract strings, which neither PHP nor
+   PHPStan see.
+5. **Derive the tests.** These cover the examples of the specification, the boundaries of every precondition,
+   the business errors, and random sequences of valid calls sampled from the preconditions. The contracts judge
+   every step.
+6. **Report.** The agent ends with a table that maps each rule to its contract, its code and its test, plus the
+   assumptions it made and the questions for the business.
+
+## Quick start
+
+**1. Install the library** (PHP 8.4+):
+
+```bash
+composer require php-deal/framework
+```
+
+**2. Start the contract kernel** in your test bootstrap (and in development), before your classes are loaded. See
+[Setup](#setup) for all options:
+
+```php
+use PhpDeal\ContractApplication;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+ContractApplication::getInstance()->init([
+    'debug'        => true,
+    'appDir'       => __DIR__ . '/..',
+    'cacheDir'     => __DIR__ . '/../var/cache/contracts',
+    'includePaths' => [__DIR__ . '/../src'],
+]);
+```
+
+**3. Give your agent the skill.** In [Claude Code](https://claude.com/claude-code), install the plugin from this
+repository:
+
+```
+/plugin marketplace add php-deal/framework
+/plugin install php-deal@php-deal
+```
+
+Other agents that read the [Agent Skills](https://agentskills.io) format can load the folder
+[`skills/design-by-contract`](skills/design-by-contract) directly. Composer installs it too, at
+`vendor/php-deal/framework/skills/design-by-contract`, in the version that matches your library.
+
+**4. Hand over the specification:**
+
+> Implement docs/booking-spec.md with Design by Contract, and write the tests.
+
+In Claude Code you can also call the skill explicitly with `/php-deal:design-by-contract`.
+
+## What the agent delivers
+
+The [worked example](skills/design-by-contract/examples/inventory) shows a complete run. Our CI weaves and runs it on
+every change:
+
+- [`SPEC.md`](skills/design-by-contract/examples/inventory/SPEC.md): nine stock-keeping rules, written for people;
+- [`StockItem.php`](skills/design-by-contract/examples/inventory/StockItem.php): the class, with each contract
+  tagged by its rule;
+- [`StockItemTest.php`](skills/design-by-contract/examples/inventory/StockItemTest.php): the tests derived from the
+  rules and the contracts;
+- a rule table:
+
+| Rule | Contract or code                                                           | Where                      | Test                                      |
+|------|----------------------------------------------------------------------------|----------------------------|-------------------------------------------|
+| R3   | `#[Invariant('$this->reserved >= 0 && $this->reserved <= $this->onHand')]` | `StockItem`                | random sequences                          |
+| R6   | `#[Verify('$quantity <= $this->available()')]`                             | `StockItem::reserve()`     | precondition boundaries                   |
+| R8   | `#[Ensure('$this->onHand === $__old->onHand - $quantity')]`                | `StockItem::ship()`        | specification example, random sequences   |
+| R9   | code: throws `CountBelowReserved`, a business error                        | `StockItem::recordCount()` | `testCountBelowTheReservationsIsRejected` |
+
+The random sequences are contract-based testing with no extra library. The agent samples valid arguments from the
+preconditions, and every postcondition and invariant checks every step:
+
+```php
+$random = new Randomizer(new Mt19937($seed));
+for ($step = 0; $step < 200; ++$step) {
+    if ($item->available() > 0) {
+        $item->reserve($random->getInt(1, $item->available())); // sampled from #[Verify]
+    }
+    $item->receive($random->getInt(1, 50));
+}
+```
+
+**Does it catch bugs?** We gave an agent with no other context a new specification (meeting-room booking) and only
+the skill. It wrote 46 contracts and 46 tests. Then it planted five bugs, one at a time: an off-by-one error, a wrong
+overlap check, a cancel that deleted every booking, reused ids and a broken free-slot check. Contracts caught all
+five.
+
+## The contract checker
+
+Contracts are PHP expressions in strings, so neither PHP nor PHPStan see their mistakes until the method runs. The
+skill bundles a checker that agents run after every edit. You can run it too, in CI or by hand:
+
+```bash
+php vendor/php-deal/framework/skills/design-by-contract/scripts/lint-contracts.php --strict src
+```
+
+It reports syntax errors, misspelled variables, `$__old` or `$__result` in the wrong contract, `$this` in static
+methods, class names that `use` imports do not resolve, double-quoted strings, assignments, reads of the clock or
+random values, and `\in_array()` without strict comparison.
 
 ## Features
+
+**For AI-driven development**
+
+- 🤖 **Agent Skill** with the full workflow from specification to tested code, installable as a Claude Code plugin
+  and portable to any agent that reads the Agent Skills format.
+- 🧭 **Traceable rules**: every contract carries the ID of the business rule it enforces.
+- 🧪 **Tests derived from contracts**: specification examples, precondition boundaries, business errors and seeded
+  random sequences.
+- 🔎 **Contract checker** that catches mistakes in expressions before they run.
+- 🎯 **Exact feedback**: a violation names the contract, the class, the method and the arguments, and points to the
+  declaring line, so the agent fixes the right place.
+
+**The contract engine**
 
 - ✅ **Native PHP attributes**: `#[Verify]`, `#[Ensure]`, `#[Invariant]` and `#[Inherit]`, repeatable where it makes sense.
 - 🧬 **Contract inheritance** from parent classes and interfaces, with clear and predictable rules.
 - 🔒 **Full access to the object**: expressions run in the scope of the class and can read private state.
 - 🕰️ **`$__old` and `$__result`** to compare the state before and after a call, and to check return values.
-- 🎯 **Precise exceptions**: `PreconditionViolation`, `PostconditionViolation` and `InvariantViolation`, pointing to
-  the method that declares the contract.
 - ⚡ **Fast**: each expression is compiled once, contracts are read once per class, and the object is cloned only when
   a contract uses `$__old`.
 - 🔁 **Recursion-safe**: an invariant may call public methods of its own class.
@@ -86,15 +247,17 @@ documentation.
 - 🔍 **PHPStan extension** included: properties and methods used only by contracts are not reported as unused.
 - 🧪 **Thoroughly tested**, analysed with PHPStan at level 10 with strict rules.
 
-## Installation
+---
 
-```bash
-composer require php-deal/framework
-```
+# The contract language
 
-PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP 4**.
+The rest of this document is the reference for the contracts themselves: what your agent writes and what you
+review. Everything in it works without an AI as well, and contracts can be written by hand.
 
 ## Setup
+
+PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP 4**. Contracts are checked only in classes
+that Go! AOP weaves, so the kernel must start before they are loaded.
 
 Initialize the contract kernel once, as early as possible in your front controller or test bootstrap, before the
 classes with contracts are loaded:
@@ -365,35 +528,6 @@ include it in your `phpstan.neon`:
 ```neon
 includes:
     - vendor/php-deal/framework/extension.neon
-```
-
-## AI coding agents
-
-PhpDeal ships an [Agent Skill](https://agentskills.io) that teaches AI coding agents to turn a business
-specification into self-checking code: it extracts the rules, maps each one to a `#[Verify]`, `#[Ensure]` or
-`#[Invariant]` (or to plain code for business errors), writes the classes, checks the contract expressions and
-derives PHPUnit tests from the contracts. The tests cover the examples of the specification, the boundaries of the
-preconditions and random sequences of valid calls.
-
-In Claude Code, install it as a plugin from this repository:
-
-```
-/plugin marketplace add php-deal/framework
-/plugin install php-deal@php-deal
-```
-
-Then ask for it, e.g. *"Implement docs/booking-spec.md with Design by Contract"*, or run
-`/php-deal:design-by-contract`. Other agents that read the Agent Skills format can use the folder
-[`skills/design-by-contract`](skills/design-by-contract) directly. It is also installed with the package, at
-`vendor/php-deal/framework/skills/design-by-contract`.
-
-The skill bundles a checker for contract expressions, which works without an AI as well. Contracts are strings, so
-neither PHP nor PHPStan see their mistakes. The checker reports syntax errors, misspelled variables, `$__old` or
-`$__result` in the wrong kind of contract, `$this` in static methods, names that `use` imports do not resolve, and
-more:
-
-```bash
-php vendor/php-deal/framework/skills/design-by-contract/scripts/lint-contracts.php src
 ```
 
 ## Production

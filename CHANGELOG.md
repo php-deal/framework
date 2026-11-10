@@ -8,7 +8,8 @@ All notable changes to this project are documented in this file. The format is b
 2.0.0 - unreleased
 ------------------
 
-A rewrite for modern PHP. See [UPGRADE-2.0.md](UPGRADE-2.0.md) for the migration steps.
+A rewrite for modern PHP and for AI-driven development: an Agent Skill lets AI coding agents turn business
+specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.md) for the migration steps.
 
 ### Added
 
