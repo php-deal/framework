@@ -117,6 +117,14 @@ final class VerifyTest extends TestCase
         Account::staticWithThis(100);
     }
 
+    public function testThisInStringOfStaticMethodIsValid(): void
+    {
+        Account::staticWithThisInString('account');
+
+        $this->expectException(PreconditionViolation::class);
+        Account::staticWithThisInString('$this');
+    }
+
     public function testSyntaxErrorIsAnInvalidContract(): void
     {
         $this->expectException(InvalidContractException::class);

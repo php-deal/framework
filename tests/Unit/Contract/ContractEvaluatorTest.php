@@ -17,6 +17,7 @@ use PhpDeal\Exception\PostconditionViolation;
 use PhpDeal\Exception\PreconditionViolation;
 use PhpDeal\Tests\Unit\Stub\FakeInvocation;
 use PhpDeal\Tests\Unit\Stub\Square;
+use PhpDeal\Tests\Unit\Stub\Status;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -48,6 +49,40 @@ final class ContractEvaluatorTest extends TestCase
         $invocation = FakeInvocation::on(new Square(), 'withParameters', 1);
 
         self::assertSame(['a' => 1, 'b' => 5, 'rest' => []], $this->evaluator->getArguments($invocation));
+    }
+
+    public function testObjectDefaultsAreNotSharedBetweenCalls(): void
+    {
+        $invocation = FakeInvocation::on(new Square(), 'withDefaults');
+
+        $first  = $this->evaluator->getArguments($invocation);
+        $second = $this->evaluator->getArguments($invocation);
+
+        self::assertInstanceOf(stdClass::class, $first['options']);
+        self::assertNotSame($first['options'], $second['options']);
+        self::assertSame(Status::Active, $second['status']);
+        self::assertSame([1], $second['list']);
+    }
+
+    public function testOldStateIsAClone(): void
+    {
+        $square = new Square();
+
+        $clone = $this->evaluator->cloneState($square);
+
+        self::assertInstanceOf(Square::class, $clone);
+        self::assertNotSame($square, $clone);
+        self::assertNull($this->evaluator->cloneState(Status::Active));
+    }
+
+    public function testThisInStringOfStaticMethodIsAllowed(): void
+    {
+        $invocation = FakeInvocation::onStatic(Square::class, 'create');
+        $contracts  = [new BoundContract(new Ensure('\'$this\' !== "" && "\\$this" !== ""'), Square::class)];
+
+        $this->evaluator->check($invocation, $contracts, [], ContractKind::Postcondition);
+
+        $this->addToAssertionCount(1);
     }
 
     public function testHoldingContractsPass(): void

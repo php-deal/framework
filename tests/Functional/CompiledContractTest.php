@@ -13,7 +13,6 @@ use PhpDeal\Tests\Fixtures\Verify\Account;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -57,7 +56,7 @@ final class CompiledContractTest extends TestCase
 
     public function testInvariantIsCompiled(): void
     {
-        [$contract] = $this->fetcher->getInvariants(new ReflectionClass(Particle::class));
+        [$contract] = $this->fetcher->getInvariants(Particle::class);
 
         self::assertNotNull($contract->check);
         $particle = new Particle(10);

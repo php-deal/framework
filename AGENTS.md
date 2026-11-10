@@ -34,7 +34,7 @@ lowest-dependencies job and `composer audit`.
 
 | Path                         | Contents |
 |------------------------------|----------|
-| `src/Attribute/`             | The attributes. `Verify`, `Ensure`, `Invariant` implement the `Contract` interface (`$expression`). |
+| `src/Attribute/`             | The attributes. `Verify`, `Ensure`, `Invariant` implement the `Contract` interface (`$expression`); only these three are ever evaluated. |
 | `src/Aspect/`                | One Go! AOP aspect per contract kind. The pointcuts are in their advice attributes. |
 | `src/Contract/ContractFetcher.php`   | Collects contracts from the method/class and its parents and interfaces, with caching. |
 | `src/Contract/ContractEvaluator.php` | Evaluates contracts: calls compiled closures, or compiles expressions with `eval()` (once) and binds them. |
@@ -78,6 +78,9 @@ lowest-dependencies job and `composer audit`.
   from the `...OriginalAlias` method or the `...OriginalTrait`. `BoundContract` binds the closure to its scope once.
   `ContractCompiler` returns `null` for anything that could behave differently than in `eval()`; keep it conservative,
   an invalid closure breaks the whole woven file.
+- **Per-call cost.** Aspects run on every call: keep reflection and string building out of the hot path. Cache by
+  class and method name in nested arrays (`ContractFetcher`, `ContractEvaluator`), and build error text only when
+  throwing.
 - **Recursion guard.** While an expression is evaluated, `ContractEvaluator::isEvaluating()` is true and every aspect
   skips its checks. This lets an invariant call public methods of its own class.
 - **Woven classes.** Go! AOP 4 turns the original class body into a `<Class>OriginalTrait`, and the proxy keeps the

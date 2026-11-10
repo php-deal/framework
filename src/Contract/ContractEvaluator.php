@@ -18,21 +18,53 @@ use Go\Aop\Intercept\MethodInvocation;
 use ParseError;
 use PhpDeal\Exception\ContractViolation;
 use PhpDeal\Exception\InvalidContractException;
+use PhpToken;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionParameter;
 use Throwable;
+use UnitEnum;
 
 /**
  * Evaluates contracts for a method invocation
  *
  * Contracts compiled while the class was woven (PHP 8.5+, see {@see ContractRewriter}) are called directly. Other
- * expressions are compiled with eval() into closures, once per process. While a contract is evaluated, contracts of nested calls are not
- * checked, so an invariant may call public methods of its own class without recursing endlessly.
+ * expressions are compiled with eval() into closures, once per process. While a contract is evaluated, contracts of
+ * nested calls are not checked, so an invariant may call public methods of its own class without recursing endlessly.
+ *
+ * Everything that does not change between calls is cached per process: the parameters of a method, the closures
+ * compiled with eval(), the static checks of an expression and whether a class can be cloned.
  */
 final class ContractEvaluator
 {
     /**
-     * @var array<string, Closure(array<string, mixed>): mixed>
+     * Closures compiled with eval(), for static and dynamic calls, by expression
+     *
+     * @var array{static: array<string, Closure(array<string, mixed>): mixed>, dynamic: array<string, Closure(array<string, mixed>): mixed>}
      */
-    private array $compiled = [];
+    private array $compiled = ['static' => [], 'dynamic' => []];
+
+    /**
+     * Parameters of a method by class and method name: name, whether it is variadic, the default value, and the
+     * parameter itself when its default must be evaluated on every call (it creates an object)
+     *
+     * @var array<string, array<string, list<array{string, bool, mixed, ?ReflectionParameter}>>>
+     */
+    private array $parameters = [];
+
+    /**
+     * Whether an expression uses the `$this` variable, by expression
+     *
+     * @var array<string, bool>
+     */
+    private array $usesThis = [];
+
+    /**
+     * Whether objects of a class can be cloned, by class name
+     *
+     * @var array<string, bool>
+     */
+    private array $cloneable = [];
 
     private int $depth = 0;
 
@@ -51,21 +83,33 @@ final class ContractEvaluator
      */
     public function getArguments(MethodInvocation $invocation): array
     {
-        $values    = $invocation->getArguments();
-        $variables = [];
-        foreach ($invocation->getMethod()->getParameters() as $index => $parameter) {
-            if ($parameter->isVariadic()) {
-                $variables[$parameter->name] = \array_slice($values, $index);
+        $method     = $invocation->getMethod();
+        $parameters = $this->parameters[$method->class][$method->name] ??= self::describeParameters($method);
+        $values     = $invocation->getArguments();
+        $variables  = [];
+        foreach ($parameters as $index => [$name, $isVariadic, $default, $lazyDefault]) {
+            if ($isVariadic) {
+                $variables[$name] = \array_slice($values, $index);
                 break;
             }
-            $variables[$parameter->name] = match (true) {
-                \array_key_exists($index, $values)    => $values[$index],
-                $parameter->isDefaultValueAvailable() => $parameter->getDefaultValue(),
-                default                               => null,
+            $variables[$name] = match (true) {
+                \array_key_exists($index, $values) => $values[$index],
+                $lazyDefault !== null              => $lazyDefault->getDefaultValue(),
+                default                            => $default,
             };
         }
 
         return $variables;
+    }
+
+    /**
+     * Returns a clone of the object for `$__old`, or null if objects of its class can not be cloned
+     */
+    public function cloneState(object $instance): ?object
+    {
+        $isCloneable = $this->cloneable[$instance::class] ??= new ReflectionClass($instance)->isCloneable();
+
+        return $isCloneable ? clone $instance : null;
     }
 
     /**
@@ -80,28 +124,31 @@ final class ContractEvaluator
     public function check(MethodInvocation $invocation, array $contracts, array $variables, ContractKind $kind): void
     {
         $instance = $invocation->getThis();
-        $location = $invocation->getMethod()->class . '::' . $invocation->getMethod()->name . '()';
         foreach ($contracts as $boundContract) {
-            $expression = $boundContract->contract->expression;
-            $evaluator  = $boundContract->check ?? $this->bindExpression($boundContract, $instance, $location);
+            $check     = $boundContract->check;
+            $evaluator = $check ?? $this->bindExpression($boundContract, $invocation);
 
             ++$this->depth;
             try {
                 // A compiled contract takes the object first, then the variables by name
-                $result = $boundContract->check !== null ? $evaluator($instance, ...$variables) : $evaluator($variables);
+                $result = $check !== null ? $check($instance, ...$variables) : $evaluator($variables);
             } catch (Throwable $error) {
                 // Assertion libraries signal failures with exceptions, broken expressions with errors
-                throw $kind->createViolation($invocation, $expression, $error);
+                throw $kind->createViolation($invocation, $boundContract->contract->expression, $error);
             } finally {
                 --$this->depth;
             }
 
             if ($result === false) {
-                throw $kind->createViolation($invocation, $expression);
+                throw $kind->createViolation($invocation, $boundContract->contract->expression);
             }
             // null is accepted for assertion helpers that return nothing
             if ($result !== true && $result !== null) {
-                throw InvalidContractException::forInvalidResult($expression, $location, $result);
+                throw InvalidContractException::forInvalidResult(
+                    $boundContract->contract->expression,
+                    self::describeLocation($invocation),
+                    $result,
+                );
             }
         }
     }
@@ -110,26 +157,85 @@ final class ContractEvaluator
      * Compiles the expression with eval() and binds it to the object, for contracts that were not compiled while
      * the class was woven
      *
+     * @return Closure(array<string, mixed>): mixed
+     *
      * @throws InvalidContractException When the expression is not valid PHP or uses $this in a static method
      */
-    private function bindExpression(BoundContract $boundContract, ?object $instance, string $location): Closure
+    private function bindExpression(BoundContract $boundContract, MethodInvocation $invocation): Closure
     {
         $expression = $boundContract->contract->expression;
+        $instance   = $invocation->getThis();
         $isStatic   = $instance === null;
-        if ($isStatic && \preg_match('/\$this\b/', $expression) === 1) {
-            throw InvalidContractException::forStaticContext($expression, $location);
+        if ($isStatic && ($this->usesThis[$expression] ??= self::usesThisVariable($expression))) {
+            throw InvalidContractException::forStaticContext($expression, self::describeLocation($invocation));
         }
         try {
             $closure = $this->compile($expression, $isStatic);
         } catch (ParseError $error) {
-            throw InvalidContractException::forSyntaxError($expression, $location, $error);
+            throw InvalidContractException::forSyntaxError($expression, self::describeLocation($invocation), $error);
         }
         $evaluator = Closure::bind($closure, $instance, $boundContract->scope);
         if ($evaluator === null) {
-            throw InvalidContractException::forStaticContext($expression, $location);
+            throw InvalidContractException::forStaticContext($expression, self::describeLocation($invocation));
         }
 
         return $evaluator;
+    }
+
+    /**
+     * Method that declares the contract, for error messages, e.g. "App\Account::deposit()"
+     */
+    private static function describeLocation(MethodInvocation $invocation): string
+    {
+        $method = $invocation->getMethod();
+
+        return $method->class . '::' . $method->name . '()';
+    }
+
+    /**
+     * Tells whether the expression reads the `$this` variable; `$this` inside a string literal does not count
+     */
+    private static function usesThisVariable(string $expression): bool
+    {
+        foreach (PhpToken::tokenize('<?php ' . $expression) as $token) {
+            if ($token->is(\T_VARIABLE) && $token->text === '$this') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<array{string, bool, mixed, ?ReflectionParameter}>
+     */
+    private static function describeParameters(ReflectionMethod $method): array
+    {
+        $parameters = [];
+        foreach ($method->getParameters() as $parameter) {
+            $default     = null;
+            $lazyDefault = null;
+            if (!$parameter->isVariadic() && $parameter->isDefaultValueAvailable()) {
+                $default = $parameter->getDefaultValue();
+                // A default created with `new` must not be shared between calls
+                if (self::containsObject($default)) {
+                    [$default, $lazyDefault] = [null, $parameter];
+                }
+            }
+            $parameters[] = [$parameter->name, $parameter->isVariadic(), $default, $lazyDefault];
+        }
+
+        return $parameters;
+    }
+
+    private static function containsObject(mixed $value): bool
+    {
+        if (\is_array($value)) {
+            return \array_any($value, self::containsObject(...));
+        }
+
+        // Enum cases are singletons, they can be shared
+        return \is_object($value) && !$value instanceof UnitEnum;
     }
 
     /**
@@ -139,9 +245,9 @@ final class ContractEvaluator
      */
     private function compile(string $expression, bool $isStatic): Closure
     {
-        $cacheKey = ($isStatic ? 'static:' : 'dynamic:') . $expression;
-        if (isset($this->compiled[$cacheKey])) {
-            return $this->compiled[$cacheKey];
+        $kind = $isStatic ? 'static' : 'dynamic';
+        if (isset($this->compiled[$kind][$expression])) {
+            return $this->compiled[$kind][$expression];
         }
         // The closing parenthesis is on its own line, so a trailing "//" comment can not swallow it
         $code = 'return ' . ($isStatic ? 'static ' : '')
@@ -156,6 +262,6 @@ final class ContractEvaluator
         }
 
         /** @var Closure(array<string, mixed>): mixed $closure */
-        return $this->compiled[$cacheKey] = $closure;
+        return $this->compiled[$kind][$expression] = $closure;
     }
 }

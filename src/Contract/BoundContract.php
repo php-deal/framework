@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace PhpDeal\Contract;
 
 use Closure;
-use PhpDeal\Attribute\Contract;
 use PhpDeal\Attribute\Ensure;
 use PhpDeal\Attribute\Invariant;
 use PhpDeal\Attribute\Verify;
@@ -24,6 +23,9 @@ use PhpDeal\Attribute\Verify;
  *
  * Contracts of a class are evaluated in the scope of that class, so they can read its private members even when the
  * method is called on a subclass. Contracts of an interface are evaluated in the scope of the implementing class.
+ *
+ * Only the built-in attributes are accepted: their expressions are constant expressions written in the source, so
+ * no computed text ever reaches eval().
  */
 final readonly class BoundContract
 {
@@ -33,17 +35,20 @@ final readonly class BoundContract
     public ?Closure $check;
 
     /**
-     * @param Contract     $contract Contract attribute
-     * @param class-string $scope    Class scope for the expression
+     * Whether the expression reads `$__old`, so the object must be cloned before the call
+     */
+    public bool $usesOldState;
+
+    /**
+     * @param Verify|Ensure|Invariant $contract Contract attribute
+     * @param class-string            $scope    Class scope for the expression
      */
     public function __construct(
-        public Contract $contract,
+        public Verify|Ensure|Invariant $contract,
         public string $scope,
     ) {
-        // Contract implementations of other packages are always evaluated with eval()
-        $isCompilable = $contract instanceof Verify || $contract instanceof Ensure || $contract instanceof Invariant;
-        $check        = $isCompilable ? $contract->check : null;
         // The closure is declared in the woven trait or the interface, it must run in the scope of the contract
-        $this->check = $check !== null ? Closure::bind($check, null, $scope) : null;
+        $this->check        = $contract->check !== null ? Closure::bind($contract->check, null, $scope) : null;
+        $this->usesOldState = \str_contains($contract->expression, '$__old');
     }
 }

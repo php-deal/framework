@@ -506,8 +506,10 @@ An expression is evaluated with `eval()` instead, as on PHP 8.4, when it could b
 a syntax error or `$this` in a static method (both still throw `InvalidContractException` when the method is called),
 `static::` or `self::method()` in an instance context, a nested `function () {}`, magic constants such as `__CLASS__`,
 variable variables, `compact()`/`extract()`/`get_defined_vars()`, a newline inside a string literal, and an
-invariant that reads a variable other than `$this` and `$__result`. Classes that are not woven, and `Contract`
-implementations of other packages, use `eval()` too.
+invariant that reads a variable other than `$this` and `$__result`. Classes that are not woven use `eval()` too.
+
+Only the built-in attributes are evaluated, and their expressions are constant expressions in your source code. Never
+build an expression from configuration, environment variables, a database or user input: it is executed as PHP code.
 
 ## Handling violations
 

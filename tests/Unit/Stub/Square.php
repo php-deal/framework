@@ -8,6 +8,7 @@ use PhpDeal\Attribute\Ensure;
 use PhpDeal\Attribute\Inherit;
 use PhpDeal\Attribute\Invariant;
 use PhpDeal\Attribute\Verify;
+use stdClass;
 use Stringable;
 
 #[Invariant('$this->sides === 4')]
@@ -41,6 +42,13 @@ final class Square extends Polygon implements Stringable
 
     #[Verify('$a > 0')]
     public function withParameters(int $a, int $b = 5, int ...$rest): void {}
+
+    /**
+     * @param list<int> $list
+     */
+    #[CustomContract]
+    #[Verify('true')]
+    public function withDefaults(stdClass $options = new stdClass(), Status $status = Status::Active, array $list = [1]): void {}
 
     #[Verify('$__result')]
     public static function create(): self

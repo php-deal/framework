@@ -13,7 +13,6 @@ use PhpDeal\Tests\Unit\Stub\Polygon;
 use PhpDeal\Tests\Unit\Stub\Square;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use ReflectionMethod;
 
 #[CoversClass(ContractFetcher::class)]
@@ -73,7 +72,7 @@ final class ContractFetcherTest extends TestCase
 
     public function testInvariantsOfInterfacesUseTheScopeOfTheClass(): void
     {
-        $contracts = $this->fetcher->getInvariants(new ReflectionClass(Square::class));
+        $contracts = $this->fetcher->getInvariants(Square::class);
 
         self::assertSame(
             [
@@ -86,13 +85,28 @@ final class ContractFetcherTest extends TestCase
         self::assertContainsOnlyInstancesOf(Invariant::class, \array_map(static fn(BoundContract $c) => $c->contract, $contracts));
     }
 
+    public function testOtherContractImplementationsAreIgnored(): void
+    {
+        $contracts = $this->fetcher->getPreconditions(new ReflectionMethod(Square::class, 'withDefaults'));
+
+        self::assertSame([['true', Square::class]], self::describe($contracts));
+    }
+
+    public function testOldStateIsDetectedOnce(): void
+    {
+        $contract = new BoundContract(new Ensure('$this->sides === $__old->sides'), Square::class);
+
+        self::assertTrue($contract->usesOldState);
+        self::assertFalse(new BoundContract(new Ensure('$__result > 0'), Square::class)->usesOldState);
+    }
+
     public function testResultsAreCached(): void
     {
         $method = new ReflectionMethod(Square::class, 'scale');
-        $class  = new ReflectionClass(Square::class);
 
         self::assertSame($this->fetcher->getPostconditions($method), $this->fetcher->getPostconditions($method));
-        self::assertSame($this->fetcher->getInvariants($class), $this->fetcher->getInvariants($class));
+        self::assertSame($this->fetcher->getPreconditions($method), $this->fetcher->getPreconditions($method));
+        self::assertSame($this->fetcher->getInvariants(Square::class), $this->fetcher->getInvariants(Square::class));
     }
 
     /**
