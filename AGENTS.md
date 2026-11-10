@@ -34,10 +34,12 @@ lowest-dependencies job and `composer audit`.
 
 | Path                         | Contents |
 |------------------------------|----------|
-| `src/Attribute/`             | The attributes. `Verify`, `Ensure`, `Invariant` implement the `Contract` interface (`$expression`). |
+| `src/Attribute/`             | The attributes. `Verify`, `Ensure`, `Invariant` implement the `Contract` interface (`$expression`); only these three are ever evaluated. |
 | `src/Aspect/`                | One Go! AOP aspect per contract kind. The pointcuts are in their advice attributes. |
 | `src/Contract/ContractFetcher.php`   | Collects contracts from the method/class and its parents and interfaces, with caching. |
-| `src/Contract/ContractEvaluator.php` | Compiles expressions to closures (once), binds them to the object/scope, evaluates them. |
+| `src/Contract/ContractEvaluator.php` | Evaluates contracts: calls compiled closures, or compiles expressions with `eval()` (once) and binds them. |
+| `src/Contract/ContractRewriter.php`  | Go! AOP `NodeRewriter` (PHP 8.5+): adds the compiled closure as `check:` to contract attributes while weaving. |
+| `src/Contract/ContractCompiler.php`  | Turns an expression into the source of a static closure, or `null` when it must stay on `eval()`. |
 | `src/Contract/BoundContract.php`     | A contract plus the class scope its expression runs in. |
 | `src/Contract/ContractKind.php`      | Enum that maps a check to its violation exception. |
 | `src/Exception/`             | `ContractViolation` and its subclasses, `InvalidContractException`, `ExceptionInterface`. |
@@ -70,6 +72,15 @@ lowest-dependencies job and `composer audit`.
   - `true` or `null` means it holds (`null` exists for assertion libraries).
   - Any other result, a `ParseError`, or `$this` in a static method throws `InvalidContractException`.
   - A `Throwable` thrown by the expression becomes the `previous` exception of a violation.
+- **Compiled contracts (PHP 8.5+).** `ContractRewriter` appends `check: static function ($__this, ...) {...}` to the
+  attribute in the token stream, on the same line (comments dropped, newlines flattened, names fully qualified,
+  `$this` → `$__this`). The proxy re-declares attributes from the AST without `check`, so `ContractFetcher` reads them
+  from the `...OriginalAlias` method or the `...OriginalTrait`. `BoundContract` binds the closure to its scope once.
+  `ContractCompiler` returns `null` for anything that could behave differently than in `eval()`; keep it conservative,
+  an invalid closure breaks the whole woven file.
+- **Per-call cost.** Aspects run on every call: keep reflection and string building out of the hot path. Cache by
+  class and method name in nested arrays (`ContractFetcher`, `ContractEvaluator`), and build error text only when
+  throwing.
 - **Recursion guard.** While an expression is evaluated, `ContractEvaluator::isEvaluating()` is true and every aspect
   skips its checks. This lets an invariant call public methods of its own class.
 - **Woven classes.** Go! AOP 4 turns the original class body into a `<Class>OriginalTrait`, and the proxy keeps the

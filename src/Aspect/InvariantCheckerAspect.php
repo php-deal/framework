@@ -20,7 +20,6 @@ use PhpDeal\Contract\ContractEvaluator;
 use PhpDeal\Contract\ContractFetcher;
 use PhpDeal\Contract\ContractKind;
 use PhpDeal\Exception\InvariantViolation;
-use ReflectionObject;
 
 /**
  * Checks `#[Invariant]` class invariants after the constructor and after every public method
@@ -48,7 +47,7 @@ final readonly class InvariantCheckerAspect implements Aspect
         if ($instance === null || $this->evaluator->isEvaluating()) {
             return $result;
         }
-        $contracts = $this->fetcher->getInvariants(new ReflectionObject($instance));
+        $contracts = $this->fetcher->getInvariants($instance::class);
         if ($contracts === []) {
             return $result;
         }

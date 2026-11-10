@@ -28,6 +28,10 @@ specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.
   PHPUnit tests derived from the contracts. It is installable as a Claude Code plugin from this repository
   (`/plugin marketplace add php-deal/framework`) (#36).
 - Static checker for contract expressions, `skills/design-by-contract/scripts/lint-contracts.php`.
+- On PHP 8.5+ contract expressions are compiled into static closures while Go! AOP weaves the class, on the line of
+  the attribute (new `check` argument of `#[Verify]`, `#[Ensure]` and `#[Invariant]`, filled in by PhpDeal). They are
+  cached by opcache, run without `eval()`, and breakpoints and stack traces point to the contract. Expressions that
+  could behave differently as a static closure, and PHP 8.4, keep using `eval()` (#76).
 
 ### Changed
 
@@ -36,6 +40,11 @@ specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.
 - Contracts of parent classes are evaluated in the scope of the declaring class.
 - Inherited preconditions are checked before the method body.
 - The object is cloned for `$__old` only when a postcondition uses it.
+- Less work per call: contracts, method parameters, invariants by class name and the cloneability of a class are
+  looked up in per-process caches before any reflection call, and error locations are built only on errors (#80).
+- Only the built-in `#[Verify]`, `#[Ensure]` and `#[Invariant]` attributes are evaluated; `BoundContract` accepts no
+  other `Contract` implementation, so computed text can not reach `eval()`. Compiled contracts come from the string
+  literal in the source (#85).
 - Violations point to the line of the method that declares the contract.
 
 ### Fixed
@@ -44,6 +53,7 @@ specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.
 - Arrays and objects among the arguments no longer break the violation message.
 - Variadic arguments are passed to contracts as a list.
 - A trailing `//` comment in an expression no longer breaks it.
+- `$this` inside a string literal of a static method's contract no longer throws `InvalidContractException` (#84).
 
 ### Removed
 

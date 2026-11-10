@@ -18,6 +18,11 @@ namespace PhpDeal\Attribute;
  *
  * The expression is evaluated in the scope of the class that declares the method, so it can read private and
  * protected members through `$this` or `self::`. Method arguments are available by their names.
+ *
+ * Only the built-in {@see Verify}, {@see Ensure} and {@see Invariant} attributes are evaluated. The expression is
+ * executed as PHP code, so it must be written in the source code, as a constant expression of the attribute. Never
+ * build it from configuration, environment variables, a database or user input. Other implementations of this
+ * interface are ignored.
  */
 interface Contract
 {

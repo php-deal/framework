@@ -1,7 +1,8 @@
 # Contract expressions
 
-A contract is one PHP expression in a string. PhpDeal compiles it once into a closure and binds the closure to the
-object, in the scope of the class that declares the contract.
+A contract is one PHP expression in a string. PhpDeal compiles it into a closure that runs in the scope of the class
+that declares the contract. On PHP 8.5+ the closure is written into the woven class (the `check:` argument of the
+attribute), on PHP 8.4 it is compiled with `eval()` at run time. Never write `check:` yourself.
 
 ## Contents
 
@@ -41,7 +42,7 @@ there: an invariant describes the object alone.
 - The expression can read private and protected members of the declaring class: `$this->balance`,
   `$this->isValid($x)`, `self::LIMIT`, `static::$registry`. A contract of an interface runs in the scope of the
   implementing class. A contract of a parent class runs in the scope of the parent and can read its private state.
-- The expression is compiled outside of your file, in the global namespace. `use` imports do **not** apply:
+- The expression is written for the global namespace. `use` imports do **not** apply:
   - classes, enums and interfaces are fully qualified: `$status === \App\Order\Status::Paid`,
     `$at instanceof \DateTimeImmutable`;
   - functions get a leading backslash: `\count()`, `\in_array($x, self::ALLOWED, true)`, `\preg_match(...)`;

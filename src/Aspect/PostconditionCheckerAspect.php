@@ -21,7 +21,6 @@ use PhpDeal\Contract\ContractEvaluator;
 use PhpDeal\Contract\ContractFetcher;
 use PhpDeal\Contract\ContractKind;
 use PhpDeal\Exception\PostconditionViolation;
-use ReflectionObject;
 
 /**
  * Checks `#[Ensure]` post-conditions after the method body has returned
@@ -56,8 +55,11 @@ final readonly class PostconditionCheckerAspect implements Aspect
         $variables = $this->evaluator->getArguments($invocation);
         $instance  = $invocation->getThis();
         // Cloning is skipped when no contract needs the previous state
-        if ($instance !== null && self::usesOldState($contracts) && new ReflectionObject($instance)->isCloneable()) {
-            $variables['__old'] = clone $instance;
+        if ($instance !== null && self::usesOldState($contracts)) {
+            $oldState = $this->evaluator->cloneState($instance);
+            if ($oldState !== null) {
+                $variables['__old'] = $oldState;
+            }
         }
 
         $result                = $invocation->proceed();
@@ -73,7 +75,7 @@ final readonly class PostconditionCheckerAspect implements Aspect
     private static function usesOldState(array $contracts): bool
     {
         foreach ($contracts as $boundContract) {
-            if (\str_contains($boundContract->contract->expression, '$__old')) {
+            if ($boundContract->usesOldState) {
                 return true;
             }
         }

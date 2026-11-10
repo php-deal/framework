@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace PhpDeal\Contract;
 
+use Go\Aop\Framework\AbstractMethodInvocation;
 use Go\Aop\Proxy;
-use PhpDeal\Attribute\Contract;
+use Go\Core\AspectContainer;
 use PhpDeal\Attribute\Ensure;
 use PhpDeal\Attribute\Inherit;
 use PhpDeal\Attribute\Invariant;
@@ -26,14 +27,31 @@ use ReflectionMethod;
 /**
  * Collects the contracts of methods and classes, including the ones inherited from parents and interfaces
  *
- * Results are cached per class and method, attributes are read only once per process.
+ * Results are cached per class and method, attributes are read only once per process. A cached answer is found
+ * with one array lookup, before any reflection call.
  */
 final class ContractFetcher
 {
     /**
+     * Pre-conditions by class and method name
+     *
+     * @var array<string, array<string, list<BoundContract>>>
+     */
+    private array $preconditions = [];
+
+    /**
+     * Post-conditions by class and method name
+     *
+     * @var array<string, array<string, list<BoundContract>>>
+     */
+    private array $postconditions = [];
+
+    /**
+     * Invariants by class name
+     *
      * @var array<string, list<BoundContract>>
      */
-    private array $cache = [];
+    private array $invariants = [];
 
     /**
      * Returns the pre-conditions of a method
@@ -45,7 +63,8 @@ final class ContractFetcher
      */
     public function getPreconditions(ReflectionMethod $method): array
     {
-        return $this->getMethodContracts($method, Verify::class, $this->inheritsPreconditions($method));
+        return $this->preconditions[$method->class][$method->name]
+            ??= self::readMethodContracts($method, Verify::class, self::inheritsPreconditions($method));
     }
 
     /**
@@ -55,45 +74,46 @@ final class ContractFetcher
      */
     public function getPostconditions(ReflectionMethod $method): array
     {
-        return $this->getMethodContracts($method, Ensure::class, true);
+        return $this->postconditions[$method->class][$method->name]
+            ??= self::readMethodContracts($method, Ensure::class, true);
     }
 
     /**
      * Returns the invariants of a class, together with the ones of parent classes and interfaces
      *
-     * @param ReflectionClass<covariant object> $class
+     * @param class-string $className
      *
      * @return list<BoundContract>
      */
-    public function getInvariants(ReflectionClass $class): array
+    public function getInvariants(string $className): array
     {
-        $cacheKey = $class->name . '#' . Invariant::class;
-        if (isset($this->cache[$cacheKey])) {
-            return $this->cache[$cacheKey];
-        }
+        return $this->invariants[$className] ??= self::readInvariants(new ReflectionClass($className));
+    }
 
+    /**
+     * @param ReflectionClass<object> $class
+     *
+     * @return list<BoundContract>
+     */
+    private static function readInvariants(ReflectionClass $class): array
+    {
         $contracts = self::readContracts($class, Invariant::class, $class->name);
         foreach (self::getAncestors($class) as $ancestor) {
             $scope = $ancestor->isInterface() ? $class->name : $ancestor->name;
             \array_push($contracts, ...self::readContracts($ancestor, Invariant::class, $scope));
         }
 
-        return $this->cache[$cacheKey] = self::unique($contracts);
+        return self::unique($contracts);
     }
 
     /**
-     * @param class-string<Contract> $type Contract attribute to collect
+     * @param class-string<Verify|Ensure> $type Contract attribute to collect
      *
      * @return list<BoundContract>
      */
-    private function getMethodContracts(ReflectionMethod $method, string $type, bool $withAncestors): array
+    private static function readMethodContracts(ReflectionMethod $method, string $type, bool $withAncestors): array
     {
-        $class    = $method->getDeclaringClass();
-        $cacheKey = $class->name . '::' . $method->name . '#' . $type . ($withAncestors ? '+' : '');
-        if (isset($this->cache[$cacheKey])) {
-            return $this->cache[$cacheKey];
-        }
-
+        $class     = $method->getDeclaringClass();
         $contracts = self::readContracts($method, $type, $class->name);
         if ($withAncestors) {
             foreach (self::getAncestors($class) as $ancestor) {
@@ -110,10 +130,10 @@ final class ContractFetcher
             }
         }
 
-        return $this->cache[$cacheKey] = self::unique($contracts);
+        return self::unique($contracts);
     }
 
-    private function inheritsPreconditions(ReflectionMethod $method): bool
+    private static function inheritsPreconditions(ReflectionMethod $method): bool
     {
         if ($method->getAttributes(Inherit::class) !== []) {
             return true;
@@ -150,8 +170,12 @@ final class ContractFetcher
     }
 
     /**
+     * Only the built-in attributes are read: their expressions are constant expressions written in the source
+     *
+     * @template T of Verify|Ensure|Invariant
+     *
      * @param ReflectionClass<covariant object>|ReflectionMethod $reflector
-     * @param class-string<Contract>                             $type
+     * @param class-string<T>                                    $type
      * @param class-string                                       $scope
      *
      * @return list<BoundContract>
@@ -160,8 +184,35 @@ final class ContractFetcher
     {
         return \array_map(
             static fn(ReflectionAttribute $attribute): BoundContract => new BoundContract($attribute->newInstance(), $scope),
-            $reflector->getAttributes($type, ReflectionAttribute::IS_INSTANCEOF),
+            self::getOriginalDeclaration($reflector)->getAttributes($type),
         );
+    }
+
+    /**
+     * Returns the declaration written in the source, which holds the contracts compiled while weaving
+     *
+     * Go! AOP moves the body of a woven class into its `...OriginalTrait` and re-declares the attributes on the proxy
+     * from the syntax tree, without the compiled closures. The trait and the `...OriginalAlias` methods keep them.
+     *
+     * @param ReflectionClass<covariant object>|ReflectionMethod $reflector
+     *
+     * @return ReflectionClass<covariant object>|ReflectionMethod
+     */
+    private static function getOriginalDeclaration(ReflectionClass|ReflectionMethod $reflector): ReflectionClass|ReflectionMethod
+    {
+        if ($reflector instanceof ReflectionClass) {
+            return $reflector->getTraits()[$reflector->name . AspectContainer::ORIGINAL_TRAIT_SUFFIX] ?? $reflector;
+        }
+        $class     = $reflector->getDeclaringClass();
+        $aliasName = $reflector->name . AbstractMethodInvocation::TRAIT_ALIAS_SUFFIX;
+        if ($class->hasMethod($aliasName)) {
+            $alias = $class->getMethod($aliasName);
+            if ($alias->getDeclaringClass()->name === $class->name) {
+                return $alias;
+            }
+        }
+
+        return $reflector;
     }
 
     /**

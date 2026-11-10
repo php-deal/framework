@@ -66,4 +66,7 @@ class Account
     {
         return $amount % 2 === 0;
     }
+
+    #[Verify('$name !== \'$this\'')]
+    public static function staticWithThisInString(string $name): void {}
 }

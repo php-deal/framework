@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace PhpDeal\Attribute;
 
 use Attribute;
+use Closure;
 
 /**
  * Post-condition: a promise of the method, checked after the method body has returned.
@@ -27,7 +28,12 @@ use Attribute;
 final readonly class Ensure implements Contract
 {
     /**
-     * @param string $expression PHP expression that must evaluate to true
+     * @param string       $expression PHP expression that must evaluate to true
+     * @param Closure|null $check      The expression compiled into a static closure. PhpDeal writes it into the woven
+     *                                 class on PHP 8.5+, it is not meant to be written by hand
      */
-    public function __construct(public string $expression) {}
+    public function __construct(
+        public string $expression,
+        public ?Closure $check = null,
+    ) {}
 }
