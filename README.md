@@ -12,7 +12,7 @@ PhpDeal enforces those rules on every call, as native PHP attributes powered by 
 [![Total Downloads](https://img.shields.io/packagist/dt/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
 [![PHP Version](https://img.shields.io/badge/php-%E2%89%A5%208.4-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/releases/8.4/)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-design--by--contract-d97757.svg)](skills/design-by-contract/SKILL.md)
-[![Go! AOP](https://img.shields.io/badge/Go!%20AOP-4.x%20%7C%205.x-1f6feb.svg)](https://github.com/goaop/framework)
+[![Go! AOP](https://img.shields.io/badge/powered%20by-Go!%20AOP-1f6feb.svg)](https://github.com/goaop/framework)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-2a5ea7.svg)](https://phpstan.org/user-guide/rule-levels)
 [![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](LICENSE)
 
