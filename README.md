@@ -256,9 +256,8 @@ review. Everything in it works without an AI as well, and contracts can be writt
 
 ## Setup
 
-PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP 4 or 5** (Go! AOP 5 needs PHP 8.5; Composer picks
-the version that fits your PHP). Contracts are checked only in classes that Go! AOP weaves, so the kernel must start
-before they are loaded.
+PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP**. Contracts are checked only in classes that
+Go! AOP weaves, so the kernel must start before they are loaded.
 
 Initialize the contract kernel once, as early as possible in your front controller or test bootstrap, before the
 classes with contracts are loaded:
