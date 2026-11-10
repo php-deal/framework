@@ -12,7 +12,7 @@ PhpDeal enforces those rules on every call, as native PHP attributes powered by 
 [![Total Downloads](https://img.shields.io/packagist/dt/php-deal/framework.svg)](https://packagist.org/packages/php-deal/framework)
 [![PHP Version](https://img.shields.io/badge/php-%E2%89%A5%208.4-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/releases/8.4/)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-design--by--contract-d97757.svg)](skills/design-by-contract/SKILL.md)
-[![Go! AOP](https://img.shields.io/badge/Go!%20AOP-4.x-1f6feb.svg)](https://github.com/goaop/framework)
+[![Go! AOP](https://img.shields.io/badge/Go!%20AOP-4.x%20%7C%205.x-1f6feb.svg)](https://github.com/goaop/framework)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-2a5ea7.svg)](https://phpstan.org/user-guide/rule-levels)
 [![License](https://img.shields.io/packagist/l/php-deal/framework.svg)](LICENSE)
 
@@ -256,8 +256,9 @@ review. Everything in it works without an AI as well, and contracts can be writt
 
 ## Setup
 
-PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP 4**. Contracts are checked only in classes
-that Go! AOP weaves, so the kernel must start before they are loaded.
+PhpDeal 2 requires **PHP 8.4** or newer and is built on **Go! AOP 4 or 5** (Go! AOP 5 needs PHP 8.5; Composer picks
+the version that fits your PHP). Contracts are checked only in classes that Go! AOP weaves, so the kernel must start
+before they are loaded.
 
 Initialize the contract kernel once, as early as possible in your front controller or test bootstrap, before the
 classes with contracts are loaded:

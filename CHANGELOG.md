@@ -31,7 +31,7 @@ specifications into contracted code and tests. See [UPGRADE-2.0.md](UPGRADE-2.0.
 
 ### Changed
 
-- Requires PHP 8.4+ and Go! AOP 4.
+- Requires PHP 8.4+ and Go! AOP 4 or 5 (`goaop/framework ^4.0 || ^5.0`; Go! AOP 5 requires PHP 8.5).
 - Each contract expression is compiled once and cached; contracts are read once per method and class.
 - Contracts of parent classes are evaluated in the scope of the declaring class.
 - Inherited preconditions are checked before the method body.

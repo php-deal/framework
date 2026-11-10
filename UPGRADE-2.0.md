@@ -15,11 +15,11 @@ Quick checklist
 Requirements
 ------------
 
-| 1.x                         | 2.0                     |
-|-----------------------------|-------------------------|
-| PHP 7.1 – 7.4               | PHP 8.4+                |
-| goaop/framework ^2.3        | goaop/framework ^4.0    |
-| doctrine/annotations        | native attributes       |
+| 1.x                         | 2.0                                 |
+|-----------------------------|-------------------------------------|
+| PHP 7.1 – 7.4               | PHP 8.4+                            |
+| goaop/framework ^2.3        | goaop/framework ^4.0 \|\| ^5.0      |
+| doctrine/annotations        | native attributes                   |
 
 Annotations become attributes
 -----------------------------
