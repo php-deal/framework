@@ -1,7 +1,17 @@
+includes:
+    - extension.neon
+
 parameters:
-    excludes_analyse:
-        - %rootDir%/../../../tests/cache
-    level: max
+    level: 10
+    phpVersion:
+        min: 80400
+        max: 80599
     paths:
-        - src/
-        - tests/
+        - src
+        - tests
+        - demo
+    excludePaths:
+        - tests/cache
+        - demo/cache
+    tmpDir: .phpstan.cache
+    treatPhpDocTypesAsCertain: false

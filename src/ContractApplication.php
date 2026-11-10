@@ -3,7 +3,7 @@
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2014-2026, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -13,36 +13,56 @@ declare(strict_types=1);
 
 namespace PhpDeal;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
-use PhpDeal\Aspect\InheritCheckerAspect;
-use Go\Core\GoAspectContainer;
 use PhpDeal\Aspect\InvariantCheckerAspect;
 use PhpDeal\Aspect\PostconditionCheckerAspect;
 use PhpDeal\Aspect\PreconditionCheckerAspect;
+use PhpDeal\Contract\ContractEvaluator;
+use PhpDeal\Contract\ContractFetcher;
 
 /**
- * Main kernel class for enabling "design by contract" paradigm
+ * Aspect kernel that enables Design by Contract checks
+ *
+ * Initialize it once, as early as possible in the front controller:
+ *
+ *     ContractApplication::getInstance()->init([
+ *         'debug'        => true,
+ *         'appDir'       => __DIR__ . '/..',
+ *         'cacheDir'     => __DIR__ . '/../var/cache/contracts',
+ *         'includePaths' => [__DIR__ . '/../src'],
+ *     ]);
+ *
+ * Applications that already have a Go! AOP kernel call {@see registerAspects()} from it instead.
  */
 class ContractApplication extends AspectKernel
 {
-
     /**
-     * Configures an AspectContainer with advisors, aspects and pointcuts
+     * Registers the contract aspects in an aspect container
      *
-     * @param AspectContainer&GoAspectContainer $container
-     *
-     * @return void
+     * Call it from `configureAop()` of your own aspect kernel to combine contracts with other aspects.
      */
+    public static function registerAspects(AspectContainer $container): void
+    {
+        $fetcher   = new ContractFetcher();
+        $evaluator = new ContractEvaluator();
+
+        $container->addLazyService(
+            PreconditionCheckerAspect::class,
+            static fn(): PreconditionCheckerAspect => new PreconditionCheckerAspect($fetcher, $evaluator),
+        );
+        $container->addLazyService(
+            PostconditionCheckerAspect::class,
+            static fn(): PostconditionCheckerAspect => new PostconditionCheckerAspect($fetcher, $evaluator),
+        );
+        $container->addLazyService(
+            InvariantCheckerAspect::class,
+            static fn(): InvariantCheckerAspect => new InvariantCheckerAspect($fetcher, $evaluator),
+        );
+    }
+
     protected function configureAop(AspectContainer $container): void
     {
-        /** @var AnnotationReader $reader */
-        $reader = $container->get('aspect.annotation.reader');
-
-        $container->registerAspect(new InvariantCheckerAspect($reader));
-        $container->registerAspect(new PostconditionCheckerAspect($reader));
-        $container->registerAspect(new PreconditionCheckerAspect($reader));
-        $container->registerAspect(new InheritCheckerAspect($reader));
+        self::registerAspects($container);
     }
 }
