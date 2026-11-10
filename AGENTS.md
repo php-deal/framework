@@ -27,6 +27,11 @@ composer phpunit     # unit and functional test suites
 composer demo        # runs demo/run.php, a smoke test of real weaving
 ```
 
+In Claude Code cloud sessions, the SessionStart hook `.claude/hooks/session-start.sh` runs `composer install` before
+the session starts. Anonymous downloads from api.github.com are rate limited there (HTTP 403, and phpstan/phpstan has
+no git source to fall back to), so the hook builds the dist zips with `git fetch` and seeds Composer's cache first.
+Don't run a second `composer install` while it works; run `composer` as root with `COMPOSER_ALLOW_SUPERUSER=1`.
+
 Run `composer test` before you commit. All three checks must pass. CI (`.github/workflows/ci.yml`) also runs a
 lowest-dependencies job and `composer audit`.
 
