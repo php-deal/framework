@@ -1,0 +1,9 @@
+# PHPStan extension of php-deal/framework, registered automatically by phpstan/extension-installer.
+# Without the installer, add it to the "includes" section of your phpstan.neon:
+#     - vendor/php-deal/framework/extension.neon
+services:
+    -
+        class: PhpDeal\PHPStan\ContractUsageExtension
+        tags:
+            - phpstan.properties.readWriteExtension
+            - phpstan.methods.alwaysUsedMethodExtension

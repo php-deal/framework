@@ -3,7 +3,7 @@
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2014-2026, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -13,87 +13,71 @@ declare(strict_types=1);
 
 namespace PhpDeal\Aspect;
 
-use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
-use Go\Aop\Support\AnnotatedReflectionMethod;
-use PhpDeal\Annotation\Ensure;
-use PhpDeal\Contract\Fetcher\Parent\MethodConditionFetcher;
-use PhpDeal\Exception\ContractViolation;
-use Go\Lang\Annotation\Around;
-use ReflectionMethod;
+use Go\Lang\Attribute\Around;
+use PhpDeal\Contract\BoundContract;
+use PhpDeal\Contract\ContractEvaluator;
+use PhpDeal\Contract\ContractFetcher;
+use PhpDeal\Contract\ContractKind;
+use PhpDeal\Exception\PostconditionViolation;
+use ReflectionObject;
 
-class PostconditionCheckerAspect extends AbstractContractAspect implements Aspect
+/**
+ * Checks `#[Ensure]` post-conditions after the method body has returned
+ *
+ * Expressions can use `$__result` (the return value) and `$__old` (a clone of the object taken before the call).
+ */
+final readonly class PostconditionCheckerAspect implements Aspect
 {
-    /**
-     * @var MethodConditionFetcher
-     */
-    private $methodConditionFetcher;
-
-    public function __construct(Reader $reader)
-    {
-        parent::__construct($reader);
-        $this->methodConditionFetcher = new MethodConditionFetcher([Ensure::class], $reader);
-    }
+    public function __construct(
+        private ContractFetcher $fetcher,
+        private ContractEvaluator $evaluator,
+    ) {}
 
     /**
-     * Verifies post-condition contract for the method
-     *
-     * @Around("@execution(PhpDeal\Annotation\Ensure)")
-     * @param MethodInvocation $invocation
-     *
-     * @throws ContractViolation
-     * @throws \ReflectionException
-     * @return mixed
+     * @throws PostconditionViolation
      */
-    public function postConditionContract(MethodInvocation $invocation)
+    #[Around(
+        '@execution(PhpDeal\Attribute\Ensure)'
+        . ' || @execution(PhpDeal\Attribute\Inherit)'
+        . ' || (@within(PhpDeal\Attribute\Inherit) && (execution(public **->*(*)) || execution(public **::*(*))))',
+    )]
+    public function checkPostconditions(MethodInvocation $invocation): mixed
     {
-        $object = $invocation->getThis();
-        $args   = $this->fetchMethodArguments($invocation);
-        $class  = $invocation->getMethod()->getDeclaringClass();
-        if (\is_object($object) && $class->isCloneable()) {
-            $args['__old'] = clone $object;
+        if ($this->evaluator->isEvaluating()) {
+            return $invocation->proceed();
+        }
+        $contracts = $this->fetcher->getPostconditions($invocation->getMethod());
+        if ($contracts === []) {
+            return $invocation->proceed();
         }
 
-        $result = $invocation->proceed();
-        $args['__result'] = $result;
-        $allContracts = $this->fetchAllContracts($invocation);
+        $variables = $this->evaluator->getArguments($invocation);
+        $instance  = $invocation->getThis();
+        // Cloning is skipped when no contract needs the previous state
+        if ($instance !== null && self::usesOldState($contracts) && new ReflectionObject($instance)->isCloneable()) {
+            $variables['__old'] = clone $instance;
+        }
 
-        $this->ensureContracts($invocation, $allContracts, $object, $class->name, $args);
+        $result                = $invocation->proceed();
+        $variables['__result'] = $result;
+        $this->evaluator->check($invocation, $contracts, $variables, ContractKind::Postcondition);
 
         return $result;
     }
 
     /**
-     * @param MethodInvocation $invocation
-     * @return array
-     * @throws \ReflectionException
+     * @param list<BoundContract> $contracts
      */
-    private function fetchAllContracts(MethodInvocation $invocation): array
+    private static function usesOldState(array $contracts): bool
     {
-        $allContracts = $this->fetchParentsContracts($invocation);
-        /** @var ReflectionMethod&AnnotatedReflectionMethod $reflectionMethod */
-        $reflectionMethod = $invocation->getMethod();
-
-        foreach ($reflectionMethod->getAnnotations() as $annotation) {
-            if ($annotation instanceof Ensure) {
-                $allContracts[] = $annotation;
+        foreach ($contracts as $boundContract) {
+            if (\str_contains($boundContract->contract->expression, '$__old')) {
+                return true;
             }
         }
 
-        return \array_unique($allContracts);
-    }
-
-    /**
-     * @param MethodInvocation $invocation
-     * @return array
-     * @throws \ReflectionException
-     */
-    private function fetchParentsContracts(MethodInvocation $invocation): array
-    {
-        return $this->methodConditionFetcher->getConditions(
-            $invocation->getMethod()->getDeclaringClass(),
-            $invocation->getMethod()->name
-        );
+        return false;
     }
 }

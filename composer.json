@@ -1,19 +1,18 @@
 {
     "name": "php-deal/framework",
-    "description": "Design by Contract framework for PHP",
-    "require": {
-        "php": "~7.1",
-        "goaop/framework": "^2.3"
-    },
-    "require-dev": {
-        "beberlei/assert": "~3.0",
-        "phpstan/phpstan": "^0.12.88",
-        "phpunit/phpunit": "^7.5",
-        "roave/security-advisories": "dev-master",
-        "slevomat/coding-standard": "^6.1",
-        "squizlabs/php_codesniffer": "^3.4",
-        "symfony/console": "~3.0|~4.0"
-    },
+    "description": "Design by Contract framework for PHP: preconditions, postconditions and invariants declared with native attributes",
+    "type": "library",
+    "keywords": [
+        "dbc",
+        "design-by-contract",
+        "contract",
+        "precondition",
+        "postcondition",
+        "invariant",
+        "attributes",
+        "aop",
+        "goaop"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -29,34 +28,68 @@
             "email": "blubb0r05+github@gmail.com"
         }
     ],
+    "require": {
+        "php": "^8.4",
+        "goaop/framework": "^4.0"
+    },
+    "require-dev": {
+        "beberlei/assert": "^3.3.3",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.3",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^13.0"
+    },
+    "suggest": {
+        "beberlei/assert": "Thin assertion library that can be used inside contract expressions"
+    },
     "autoload": {
         "psr-4": {
             "PhpDeal\\": "src/"
         }
     },
     "autoload-dev": {
-        "psr-0": {
-            "Demo\\": "demo/"
-        },
         "psr-4": {
-            "PhpDeal\\": "tests/"
+            "Demo\\": "demo/",
+            "PhpDeal\\Tests\\": "tests/"
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyze",
-        "phpcs": "phpcs src tests -sp --colors",
-        "phpunit": "phpunit --verbose --colors=always",
+        "cs": "php-cs-fixer check --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "phpstan": "phpstan analyse --memory-limit=1G",
+        "phpunit": "phpunit",
+        "demo": "php demo/run.php",
         "test": [
+            "@cs",
             "@phpstan",
-            "@phpcs",
             "@phpunit"
         ]
     },
-    "config": {
-        "sort-packages": true
+    "scripts-descriptions": {
+        "cs": "Check the coding style",
+        "cs:fix": "Fix the coding style",
+        "phpstan": "Run static analysis (PHPStan level 10)",
+        "phpunit": "Run the test suite",
+        "demo": "Run the demo application",
+        "test": "Run every quality check"
     },
-    "suggest": {
-        "beberlei/assert": "Thin assertion library for input validation in business models. Used for tests."
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        },
+        "phpstan": {
+            "includes": [
+                "extension.neon"
+            ]
+        }
     },
     "support": {
         "issues": "https://github.com/php-deal/framework/issues",

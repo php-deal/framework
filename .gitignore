@@ -1,15 +1,19 @@
 # Composer
-vendor/
-composer.lock
+/vendor/
+/composer.lock
 
-# Cache
+# Caches
 /tests/cache/
 /demo/cache/
+/.phpunit.cache/
+/.phpstan.cache/
+/.php-cs-fixer.cache
 
-# Code quality
+# Local overrides of the distributed configuration
 /phpunit.xml
-/phpcs.xml
 /phpstan.neon
+/.php-cs-fixer.php
 
-
-
+# Coverage reports
+/coverage/
+/coverage.xml

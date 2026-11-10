@@ -3,7 +3,7 @@
 /**
  * PHP Deal framework
  *
- * @copyright Copyright 2019, Lisachenko Alexander <lisachenko.it@gmail.com>
+ * @copyright Copyright 2014-2026, Lisachenko Alexander <lisachenko.it@gmail.com>
  *
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
@@ -13,69 +13,50 @@ declare(strict_types=1);
 
 namespace PhpDeal\Aspect;
 
-use Doctrine\Common\Annotations\Reader;
 use Go\Aop\Aspect;
 use Go\Aop\Intercept\MethodInvocation;
-use PhpDeal\Annotation\Invariant;
-use PhpDeal\Contract\Fetcher\Parent\InvariantFetcher;
-use PhpDeal\Exception\ContractViolation;
-use Go\Lang\Annotation\Around;
-use ReflectionClass;
+use Go\Lang\Attribute\Around;
+use PhpDeal\Contract\ContractEvaluator;
+use PhpDeal\Contract\ContractFetcher;
+use PhpDeal\Contract\ContractKind;
+use PhpDeal\Exception\InvariantViolation;
+use ReflectionObject;
 
-class InvariantCheckerAspect extends AbstractContractAspect implements Aspect
+/**
+ * Checks `#[Invariant]` class invariants after the constructor and after every public method
+ *
+ * The invariants of the object's own class, its parent classes and its interfaces are checked.
+ */
+final readonly class InvariantCheckerAspect implements Aspect
 {
-    /**
-     * @var InvariantFetcher
-     */
-    private $invariantFetcher;
-
-    public function __construct(Reader $reader)
-    {
-        parent::__construct($reader);
-        $this->invariantFetcher = new InvariantFetcher([Invariant::class], $reader);
-    }
+    public function __construct(
+        private ContractFetcher $fetcher,
+        private ContractEvaluator $evaluator,
+    ) {}
 
     /**
-     * Verifies invariants for contract class
-     *
-     * @Around("@within(PhpDeal\Annotation\Invariant) && execution(public **->*(*))")
-     * @param MethodInvocation $invocation
-     *
-     * @throws ContractViolation
-     * @throws \ReflectionException
-     * @return mixed
+     * @throws InvariantViolation
      */
-    public function invariantContract(MethodInvocation $invocation)
+    #[Around(
+        '(@within(PhpDeal\Attribute\Invariant) || @within(PhpDeal\Attribute\Inherit))'
+        . ' && execution(public **->*(*))',
+    )]
+    public function checkInvariants(MethodInvocation $invocation): mixed
     {
-        $object = $invocation->getThis();
-        $args   = $this->fetchMethodArguments($invocation);
-        $class  = $invocation->getMethod()->getDeclaringClass();
-        if (\is_object($object) && $class->isCloneable()) {
-            $args['__old'] = clone $object;
+        $result   = $invocation->proceed();
+        $instance = $invocation->getThis();
+        if ($instance === null || $this->evaluator->isEvaluating()) {
+            return $result;
+        }
+        $contracts = $this->fetcher->getInvariants(new ReflectionObject($instance));
+        if ($contracts === []) {
+            return $result;
         }
 
-        $result = $invocation->proceed();
-        $args['__result'] = $result;
-
-        $allContracts = $this->fetchAllContracts($class);
-        $this->ensureContracts($invocation, $allContracts, $object, $class->name, $args);
+        $variables             = $this->evaluator->getArguments($invocation);
+        $variables['__result'] = $result;
+        $this->evaluator->check($invocation, $contracts, $variables, ContractKind::Invariant);
 
         return $result;
-    }
-
-    /**
-     * @param ReflectionClass $class
-     * @return array
-     */
-    private function fetchAllContracts(ReflectionClass $class): array
-    {
-        $allContracts = $this->invariantFetcher->getConditions($class);
-        foreach ($this->reader->getClassAnnotations($class) as $annotation) {
-            if ($annotation instanceof Invariant) {
-                $allContracts[] = $annotation;
-            }
-        }
-
-        return \array_unique($allContracts);
     }
 }

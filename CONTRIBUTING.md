@@ -43,7 +43,30 @@ Making Changes
 
 
 -  Make sure you have added the necessary tests for your changes.
--  Run *all* the tests to assure nothing else was accidentally broken.
+-  Run *all* the checks to assure nothing else was accidentally broken.
+
+Development
+-----------
+
+PHP 8.4 or newer is required. Install the dependencies and run every check with Composer:
+
+```bash
+composer install
+composer test        # coding style, PHPStan (level 10) and PHPUnit
+```
+
+The checks can also be run one by one:
+
+| Command              | What it does                                         |
+|----------------------|------------------------------------------------------|
+| `composer phpunit`   | Runs the unit and functional test suites             |
+| `composer phpstan`   | Runs static analysis at PHPStan level 10             |
+| `composer cs`        | Checks the coding style (PER-CS 2.0)                 |
+| `composer cs:fix`    | Fixes the coding style                               |
+| `composer demo`      | Runs the demo application from the `demo/` directory |
+
+Functional tests weave the classes in `tests/Fixtures` with Go! AOP. The woven code is cached in `tests/cache`;
+delete that directory if you ever see stale results.
 
 Submitting Changes
 ------------------
