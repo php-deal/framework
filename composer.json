@@ -1,6 +1,6 @@
 {
     "name": "php-deal/framework",
-    "description": "Design by Contract framework for PHP: preconditions, postconditions and invariants declared with native attributes",
+    "description": "AI Design by Contract for PHP: AI agents turn business specifications into code with preconditions, postconditions and invariants, checked on every call",
     "type": "library",
     "keywords": [
         "dbc",
@@ -11,7 +11,13 @@
         "invariant",
         "attributes",
         "aop",
-        "goaop"
+        "goaop",
+        "ai",
+        "ai-agents",
+        "agent-skills",
+        "claude-code",
+        "specification",
+        "contract-based-testing"
     ],
     "license": "MIT",
     "authors": [
