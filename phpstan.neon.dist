@@ -11,7 +11,7 @@ parameters:
         - tests
         - demo
     excludePaths:
-        - tests/cache
-        - demo/cache
+        - tests/cache (?)
+        - demo/cache (?)
     tmpDir: .phpstan.cache
     treatPhpDocTypesAsCertain: false
