@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   tests:
-    name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }} deps${{ matrix.goaop && format(', goaop {0}', matrix.goaop) || '' }})
+    name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }} deps)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -25,10 +25,6 @@ jobs:
         include:
           - php: '8.4'
             dependencies: lowest
-          # Go! AOP 5 (PHP 8.5+) has no stable release yet; drop this entry once 5.0.0 is tagged
-          - php: '8.5'
-            dependencies: highest
-            goaop: 5.x-dev
     steps:
       - uses: actions/checkout@v7
 
@@ -37,10 +33,6 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: pcov
           tools: composer:v2
-
-      - name: Require Go! AOP ${{ matrix.goaop }}
-        if: matrix.goaop
-        run: composer require --no-update --no-interaction "goaop/framework:${{ matrix.goaop }}"
 
       - uses: ramsey/composer-install@v4
         with:

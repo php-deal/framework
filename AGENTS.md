@@ -12,7 +12,8 @@ every call.
 
 - PHP **8.4+** (CI runs 8.4 and 8.5). Do not use PHP 8.5-only features; PHPStan analyses for the 8.4–8.5 range.
 - Runtime dependency: `goaop/framework ^4.0 || ^5.0` only. Go! AOP 5 needs PHP 8.5 and has the same API as 4.x,
-  so code must work with both. Do not add runtime dependencies without a strong reason.
+  so code must work with both. Until 5.0.0 is released, `composer.json` says `^5.0@dev`, so that CI on PHP 8.5 runs
+  against 5.x-dev; remove `@dev` after the release. Do not add runtime dependencies without a strong reason.
 - Version 2.x is a major rewrite of 1.x (Doctrine annotations). Keep [UPGRADE-2.0.md](UPGRADE-2.0.md) and
   [CHANGELOG.md](CHANGELOG.md) in sync with behaviour changes.
 
