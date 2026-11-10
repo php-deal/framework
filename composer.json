@@ -52,8 +52,12 @@
     "autoload-dev": {
         "psr-4": {
             "Demo\\": "demo/",
+            "Example\\Inventory\\": "skills/design-by-contract/examples/inventory/",
             "PhpDeal\\Tests\\": "tests/"
-        }
+        },
+        "classmap": [
+            "skills/design-by-contract/scripts/"
+        ]
     },
     "scripts": {
         "cs": "php-cs-fixer check --diff",

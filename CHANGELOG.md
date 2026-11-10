@@ -23,6 +23,10 @@ A rewrite for modern PHP. See [UPGRADE-2.0.md](UPGRADE-2.0.md) for the migration
 - Invariants are checked after the constructor.
 - PHPStan extension: properties and methods used only by contracts are not reported as unused.
 - GitHub Actions CI on PHP 8.4 and 8.5, PHPStan level 10 with strict rules, PHP-CS-Fixer.
+- Agent Skill `design-by-contract` for AI coding agents: turns business specifications into contracted code and
+  PHPUnit tests derived from the contracts. It is installable as a Claude Code plugin from this repository
+  (`/plugin marketplace add php-deal/framework`) (#36).
+- Static checker for contract expressions, `skills/design-by-contract/scripts/lint-contracts.php`.
 
 ### Changed
 
